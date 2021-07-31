@@ -8,6 +8,7 @@ RUN apt -y install curl apt-transport-https lsb-release gnupg procps net-tools x
 RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add -
 RUN echo "deb https://packages.wazuh.com/4.x/apt/ stable main" | tee -a /etc/apt/sources.list.d/wazuh.list
 RUN curl -so yq_linux_amd64.tar.gz https://github.com/mikefarah/yq/releases/download/$YQ_VERSION/yq_linux_amd64.tar.gz
+RUN ls -alh yq_linux_amd64.tar.gz
 RUN tar xz yq_linux_amd64.tar.gz && mv yq_linux_amd64 /usr/bin/yq
 RUN apt update
 RUN apt -y install wazuh-manager filebeat
