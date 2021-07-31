@@ -3,12 +3,10 @@ ARG IMAGE_NAME=debian
 ARG IMAGE_TAG=stretch-slim
 FROM ${IMAGE_NAME}:${IMAGE_TAG}
 RUN apt update
-RUN apt -y install curl apt-transport-https lsb-release gnupg procps net-tools xmlstarlet
+RUN apt -y install curl apt-transport-https lsb-release gnupg procps net-tools wget xmlstarlet
 RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add -
 RUN echo "deb https://packages.wazuh.com/4.x/apt/ stable main" | tee -a /etc/apt/sources.list.d/wazuh.list
-RUN curl -vvv -L -so yq_linux_amd64.tar.gz https://github.com/mikefarah/yq/releases/download/v4.2.0/yq_linux_amd64.tar.gz
-RUN tar xz yq_linux_amd64.tar.gz
-RUN mv yq_linux_amd64 /usr/bin/yq && rm yq_linux_amd64.tar.gz
+RUN wget https://github.com/mikefarah/yq/releases/download/v4.2.0/yq_linux_amd64.tar.gz -O - | tar xz && mv ${BINARY} /usr/bin/yq
 RUN apt update
 RUN apt -y install wazuh-manager filebeat
 RUN curl -so /etc/filebeat/filebeat.yml https://packages.wazuh.com/resources/4.1/open-distro/filebeat/7.x/filebeat_elastic_cluster.yml
