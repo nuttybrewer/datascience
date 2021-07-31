@@ -1,13 +1,12 @@
 # Steps taken from https://documentation.wazuh.com/current/installation-guide/open-distro/distributed-deployment/step-by-step-installation/wazuh-cluster/wazuh_multi_node_cluster.html#wazuh-multi-node-cluster
 ARG IMAGE_NAME=debian
 ARG IMAGE_TAG=stretch-slim
-ENV YQ_VERSION=v4.2.0
 FROM ${IMAGE_NAME}:${IMAGE_TAG}
 RUN apt update
 RUN apt -y install curl apt-transport-https lsb-release gnupg procps net-tools xmlstarlet
 RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add -
 RUN echo "deb https://packages.wazuh.com/4.x/apt/ stable main" | tee -a /etc/apt/sources.list.d/wazuh.list
-RUN curl -vvv -L -so yq_linux_amd64.tar.gz "https://github.com/mikefarah/yq/releases/download/$YQ_VERSION/yq_linux_amd64.tar.gz"
+RUN curl -vvv -L -so yq_linux_amd64.tar.gz https://github.com/mikefarah/yq/releases/download/v4.2.0/yq_linux_amd64.tar.gz
 RUN tar xz yq_linux_amd64.tar.gz
 RUN mv yq_linux_amd64 /usr/bin/yq && rm yq_linux_amd64.tar.gz
 RUN apt update
