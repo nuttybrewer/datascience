@@ -22,8 +22,7 @@ if [[ $WAZUH_CLUSTER_DISABLED -eq "no" ]]; then
   fi
 
   # Output config file, strip the root elements first!
-  echo $XML_CONFIG
-  echo $XML_CONFIG | tail -n +2 | head -n "-1"
+  echo $XML_CONFIG | xmlstarlet fo -o | tail -n +2 | head -n "-1" > /var/ossec/etc/ossec.conf
 
   # Load up the config for the next batch of editing
   XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
