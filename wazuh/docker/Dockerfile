@@ -1,7 +1,7 @@
 # Steps taken from https://documentation.wazuh.com/current/installation-guide/open-distro/distributed-deployment/step-by-step-installation/wazuh-cluster/wazuh_multi_node_cluster.html#wazuh-multi-node-cluster
 ARG IMAGE_NAME=debian
 ARG IMAGE_TAG=stretch-slim
-ARG YQ_VERSION=v4.2.0
+ENV YQ_VERSION=v4.2.0
 FROM ${IMAGE_NAME}:${IMAGE_TAG}
 RUN apt update
 RUN apt -y install curl apt-transport-https lsb-release gnupg procps net-tools xmlstarlet
