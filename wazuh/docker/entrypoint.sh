@@ -49,7 +49,8 @@ echo "Original filebeat.yml: "
 cat /etc/filebeat/filebeat.yml
 if [[ $FILEBEAT_ES_HOSTS ]]; then
   echo "Adding ${FILEBEAT_ES_HOSTS} to /etc/filebeat/filebeat.yml"
-  yq eval '.output.elasticsearch.hosts = env(FILEBEAT_ES_HOSTS) | .["output.elasticsearch"].hosts[] style="double"' /etc/filebeat/filebeat.yml > /etc/filebeat/filebeat.yml
+  yq eval '.output.elasticsearch.hosts = env(FILEBEAT_ES_HOSTS) | .output.elasticsearch.hosts[] style="double"' /etc/filebeat/filebeat.yml > /etc/filebeat/filebeat.yml
+  cat /etc/filebeat/filebeat.yml
   if [[ $FILEBEAT_ES_USER ]]; then
     echo "Adding ${FILEBEAT_ES_USER} and password to /etc/filebeat/filebeat.yml"
     yq eval '.output.elasticsearch.username = env(FILEBEAT_ES_USER) | .output.elasticsearch.password = env(FILEBEAT_ES_PASS)' /etc/filebeat/filebeat.yml > /etc/filebeat/filebeat.yml
