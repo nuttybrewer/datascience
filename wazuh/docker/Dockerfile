@@ -9,7 +9,7 @@ RUN echo "deb https://packages.wazuh.com/4.x/apt/ stable main" | tee -a /etc/apt
 RUN wget https://github.com/mikefarah/yq/releases/download/v4.11.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
 RUN apt update
 RUN apt -y install wazuh-manager filebeat
-RUN curl -so /etc/filebeat/filebeat.yml https://packages.wazuh.com/resources/4.1/open-distro/filebeat/7.x/filebeat_elastic_cluster.yml
+ADD filebeat.yml /etc/filebeat/filebeat/yml
 RUN curl -so /etc/filebeat/wazuh-template.json https://raw.githubusercontent.com/wazuh/wazuh/4.1/extensions/elasticsearch/7.x/wazuh-template.json
 RUN chmod go+r /etc/filebeat/wazuh-template.json
 RUN curl -s https://packages.wazuh.com/4.x/filebeat/wazuh-filebeat-0.1.tar.gz | tar -xvz -C /usr/share/filebeat/module

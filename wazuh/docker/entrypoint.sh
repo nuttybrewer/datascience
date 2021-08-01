@@ -46,11 +46,11 @@ fi
 
 # Configure filebeats with environment variables
 if [[ $FILEBEAT_ES_HOSTS ]]; then
-  yq eval '.["output.elasticsearch"].hosts = env(FILEBEAT_ES_HOSTS) | .["output.elasticsearch"].hosts[] style="double"' /etc/filebeat/filebeat.yml
+  yq eval '.output.elasticsearch.hosts = env(FILEBEAT_ES_HOSTS) | .["output.elasticsearch"].hosts[] style="double"' /etc/filebeat/filebeat.yml
   if [[ $FILEBEAT_ES_USER ]]; then
-    yq eval '.["output.elasticsearch"].username = env(FILEBEAT_ES_USER) | .["output.elasticsearch"].password = env(FILEBEAT_ES_PASS)' /etc/filebeat/filebeat.yml > /etc/filebeat/filebeat.yml
+    yq eval '.output.elasticsearch.username = env(FILEBEAT_ES_USER) | .output.elasticsearch.password = env(FILEBEAT_ES_PASS)' /etc/filebeat/filebeat.yml > /etc/filebeat/filebeat.yml
   else
-    yq eval 'del(.["output.elasticsearch"].username) | del(.["output.elasticsearch"].password)' /etc/filebeat/filebeat.yml > /etc/filebeat/filebeat.yml
+    yq eval 'del(.output.elasticsearch.username) | del(.output.elasticsearch.password)' /etc/filebeat/filebeat.yml > /etc/filebeat/filebeat.yml
   fi
 fi
 service filebeat start
