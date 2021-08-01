@@ -4,6 +4,7 @@ echo "WAZUH_CLUSTER_DISABLED: ${WAZUH_CLUSTER_DISABLED:-yes}"
 echo "WAZUH_CLUSTER_NODE_TYPE: ${WAZUH_CLUSTER_NODE_TYPE:-worker}"
 echo "WAZUH_CLUSTER_MASTER: ${WAZUH_CLUSTER_MASTER}"
 echo "FILEBEAT_ES_HOSTS: ${FILEBEAT_ES_HOSTS}"
+echo "FILEBEAT_ES_SSL_VERIFICATION_MODE: ${FILEBEAT_ES_SSL_VERIFICATION_MODE:-certificate}"
 echo "FILEBEAT_ES_USER: ${FILEBEAT_ES_USER}"
 
 # echo "${WAZUH_CLUSTER_KEY}"
@@ -36,7 +37,7 @@ service wazuh-manager start
 
 # Create self-sign certs if they don't exist for filebeat
 if [[ ! -d "/etc/filebeat/certs" ]]; then
-  echo "Creating self-signed certs for Filebeat"
+  echo "Creating self-signed certs for Filebeat in default location"
   mkdir /etc/filebeat/certs
   openssl req -nodes -x509 -newkey rsa:4096 -keyout /etc/filebeat/certs/filebeat-key.pem -out /etc/filebeat/certs/filebeat.pem -days 365 -subj "/CN=myfilebeatnode.internal/emailAddress=dev@example.internal"
   cp /etc/filebeat/certs/filebeat.pem /etc/filebeat/certs/root-ca.pem
@@ -47,6 +48,7 @@ fi
 if [[ $FILEBEAT_ES_HOSTS ]]; then
   echo "Adding ${FILEBEAT_ES_HOSTS} to /etc/filebeat/filebeat.yml"
   yq eval -i '.output.elasticsearch.hosts = env(FILEBEAT_ES_HOSTS) | .output.elasticsearch.hosts[] style="double"' /etc/filebeat/filebeat.yml
+  yq eval -i '.output.elasticsearch.ssl.verification_mode = env(FILEBEAT_ES_SSL_VERIFICATION_MODE)' /etc/filebeat/filebeat.yml
   if [[ $FILEBEAT_ES_USER ]]; then
     echo "Adding ${FILEBEAT_ES_USER} and password to /etc/filebeat/filebeat.yml"
     yq eval -i '.output.elasticsearch.username = env(FILEBEAT_ES_USER) | .output.elasticsearch.password = env(FILEBEAT_ES_PASS)' /etc/filebeat/filebeat.yml
