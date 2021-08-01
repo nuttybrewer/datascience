@@ -45,13 +45,20 @@ if [[ ! -f "/etc/filebeat/certs/filebeat.pem" ]]; then
 fi
 
 # Configure filebeats with environment variables
+echo "Original filebeat.yml: "
+cat /etc/filebeat/filebeat.yml
 if [[ $FILEBEAT_ES_HOSTS ]]; then
-  yq eval '.output.elasticsearch.hosts = env(FILEBEAT_ES_HOSTS) | .["output.elasticsearch"].hosts[] style="double"' /etc/filebeat/filebeat.yml
+  echo "Adding ${FILEBEAT_ES_HOSTS} to /etc/filebeat/filebeat.yml"
+  yq eval '.output.elasticsearch.hosts = env(FILEBEAT_ES_HOSTS) | .["output.elasticsearch"].hosts[] style="double"' /etc/filebeat/filebeat.yml > /etc/filebeat/filebeat.yml
   if [[ $FILEBEAT_ES_USER ]]; then
+    echo "Adding ${FILEBEAT_ES_USER} and password to /etc/filebeat/filebeat.yml"
     yq eval '.output.elasticsearch.username = env(FILEBEAT_ES_USER) | .output.elasticsearch.password = env(FILEBEAT_ES_PASS)' /etc/filebeat/filebeat.yml > /etc/filebeat/filebeat.yml
   else
+    echo "Removing output.elasticsearch.username and password from /etc/filebeat/filebeat.yml"
     yq eval 'del(.output.elasticsearch.username) | del(.output.elasticsearch.password)' /etc/filebeat/filebeat.yml > /etc/filebeat/filebeat.yml
   fi
+  echo "Edited filebeat.yml: "
+  cat /etc/filebeat/filebeat.yml
 fi
 service filebeat start
 
