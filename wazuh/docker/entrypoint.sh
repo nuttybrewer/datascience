@@ -53,6 +53,7 @@ if [[ $FILEBEAT_ES_HOSTS ]]; then
   if [[ $FILEBEAT_ES_USER ]]; then
     echo "Adding ${FILEBEAT_ES_USER} and password to /etc/filebeat/filebeat.yml"
     yq eval '.output.elasticsearch.username = env(FILEBEAT_ES_USER) | .output.elasticsearch.password = env(FILEBEAT_ES_PASS)' /etc/filebeat/filebeat.yml > /etc/filebeat/filebeat.yml
+    cat /etc/filebeat/filebeat.yml
   else
     echo "Removing output.elasticsearch.username and password from /etc/filebeat/filebeat.yml"
     yq eval 'del(.output.elasticsearch.username) | del(.output.elasticsearch.password)' /etc/filebeat/filebeat.yml > /etc/filebeat/filebeat.yml
@@ -60,6 +61,7 @@ if [[ $FILEBEAT_ES_HOSTS ]]; then
   echo "Edited filebeat.yml: "
   cat /etc/filebeat/filebeat.yml
 fi
+chmod 644 /etc/filebeat.yml
 service filebeat start
 
 # Check that wazuh manager started properly
