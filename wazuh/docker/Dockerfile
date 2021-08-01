@@ -15,7 +15,7 @@ RUN chmod go+r /etc/filebeat/wazuh-template.json
 RUN curl -s https://packages.wazuh.com/4.x/filebeat/wazuh-filebeat-0.1.tar.gz | tar -xvz -C /usr/share/filebeat/module
 RUN update-rc.d wazuh-manager defaults 95 10
 RUN update-rc.d filebeat defaults 95 10
-COPY entrypoint.sh /docker-entrypoint.sh
+ADD entrypoint.sh /docker-entrypoint.sh
 RUN chmod o+x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 EXPOSE 514/tcp 514/udp 1514/tcp 1515/udp 1515/tcp 1516/tcp 55000/tcp
