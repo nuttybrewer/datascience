@@ -3,5 +3,5 @@ ARG IMAGE_TAG=1.13.2
 FROM ${IMAGE_NAME}:${IMAGE_TAG}
 USER 0
 ADD --chown=1000:0 entrypoint.sh /docker-entrypoint.sh
-RUN chmod o+x /docker-entrypoint.sh
+RUN chmod 0755 /docker-entrypoint.sh
 USER 1000
