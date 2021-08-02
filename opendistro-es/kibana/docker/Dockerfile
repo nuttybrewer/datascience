@@ -5,4 +5,4 @@ USER 0
 ADD --chown=1000:0 entrypoint.sh /usr/share/kibana/docker-entrypoint.sh
 RUN chmod o+x /usr/share/kibana/docker-entrypoint.sh
 USER 1000
-ENTRYPOINT ["/usr/share/kibana/docker-entrypoint.sh"]
+CMD ["/usr/share/kibana/docker-entrypoint.sh"]
