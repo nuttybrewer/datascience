@@ -7,7 +7,7 @@ if [[ ! -z "${KIBANA_PLUGINS_SPACE_DELIMITED}" ]]; then
     echo "Installing ${PLUGIN}"
   #   exec /usr/share/kibana/bin/kibana-plugin install "${PLUGIN}"
   done
-  chown -R kibana:root /usr/share/kibana/data
+  sudo -c "chown -R kibana:root /usr/share/kibana/data"
 fi
 
 /usr/local/bin/kibana-docker
