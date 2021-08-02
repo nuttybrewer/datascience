@@ -4,5 +4,5 @@ FROM ${IMAGE_NAME}:${IMAGE_TAG}
 USER kibana
 RUN /usr/share/kibana/bin/kibana-plugin install https://packages.wazuh.com/4.x/ui/kibana/wazuh_kibana-4.1.5_7.10.2-1.zip
 USER root
-RUN chown -R kibana:kibana /usr/share/kibana/data
+RUN chown -R kibana:root /usr/share/kibana/data
 USER kibana
