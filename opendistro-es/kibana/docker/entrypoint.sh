@@ -11,10 +11,14 @@ if [[ ! -z "${KIBANA_PLUGINS_SPACE_DELIMITED}" ]]; then
 fi
 
 if [[ -f "/var/run/wazuh.yml" ]]; then
-  echo "Detected wazuh plugin confuration, copying into place"
-  cp /var/run/wazuh.yml /usr/share/kibana/data/wazuh/config/wazuh.yml
-  chown kibana:root /usr/share/kibana/data/wazuh/config/wazuh.yml
-  chmod 644 /usr/share/kibana/data/wazuh/config/wazuh.yml
+  if [[ -d "/usr/share/kibana/data/wazuh/config" ]]; then
+    echo "Detected wazuh plugin confuration, copying into place"
+    cp /var/run/wazuh.yml /usr/share/kibana/data/wazuh/config/wazuh.yml
+    chown kibana:root /usr/share/kibana/data/wazuh/config/wazuh.yml
+    chmod 644 /usr/share/kibana/data/wazuh/config/wazuh.yml
+  else
+    echo "Unable to copy over configuration, Wazuh plugin likely not installed correctly"
+  fi
 fi
 
 /usr/local/bin/kibana-docker
