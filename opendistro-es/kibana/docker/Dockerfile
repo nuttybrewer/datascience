@@ -5,4 +5,3 @@ USER 0
 ADD --chown=1000:0 entrypoint.sh /docker-entrypoint.sh
 RUN chmod o+x /docker-entrypoint.sh
 USER 1000
-CMD ["/docker-entrypoint.sh"]
