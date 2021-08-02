@@ -10,4 +10,11 @@ if [[ ! -z "${KIBANA_PLUGINS_SPACE_DELIMITED}" ]]; then
   sudo -c "chown -R kibana:root /usr/share/kibana/data"
 fi
 
+if [[ -f "/var/run/wazuh.yml"]]; then
+  echo "Detected wazuh plugin confuration, copying into place"
+  cp /var/run/wazuh.yml /usr/share/kibana/data/wazuh/config/wazuh.yml
+  chown kibana:root /usr/share/kibana/data/wazuh/config/wazuh.yml
+  chmod 644 /usr/share/kibana/data/wazuh/config/wazuh.yml
+fi
+
 /usr/local/bin/kibana-docker
