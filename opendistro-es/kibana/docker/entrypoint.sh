@@ -9,4 +9,4 @@ echo "KIBANA_PLUGINS_SPACE_DELIMITED: ${KIBANA_PLUGINS_SPACE_DELIMITED:-None}"
   # done
 # fi
 
-/usr/local/bin/kibana-docker
+# /usr/local/bin/kibana-docker
