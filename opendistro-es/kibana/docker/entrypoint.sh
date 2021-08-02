@@ -9,4 +9,4 @@ if [[ ! -z "${KIBANA_PLUGINS_SPACE_DELIMITED}" ]]; then
   done
 fi
 
-# /usr/local/bin/kibana-docker
+/usr/local/bin/kibana-docker
