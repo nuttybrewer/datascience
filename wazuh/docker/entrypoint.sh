@@ -2,7 +2,7 @@
 echo "Provided environment variables"
 echo "WAZUH_CLUSTER_DISABLED: ${WAZUH_CLUSTER_DISABLED:-yes}"
 echo "WAZUH_CLUSTER_NODE_TYPE: ${WAZUH_CLUSTER_NODE_TYPE:-worker}"
-echo "WAZUH_CLUSTER_MASTER: ${WAZUH_CLUSTER_MASTER}"
+echo "WAZUH_CLUSTER_MANAGER: ${WAZUH_CLUSTER_MANAGER:-localhost}"
 echo "FILEBEAT_ES_HOSTS: ${FILEBEAT_ES_HOSTS}"
 echo "FILEBEAT_ES_SSL_VERIFICATION_MODE: ${FILEBEAT_ES_SSL_VERIFICATION_MODE:-certificate}"
 echo "FILEBEAT_ES_USER: ${FILEBEAT_ES_USER}"
@@ -18,11 +18,11 @@ if [[ $WAZUH_CLUSTER_DISABLED -eq "no" ]]; then
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/node_name" -v $(hostname))
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/disabled" -v "no")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/key" -v "${WAZUH_CLUSTER_KEY:-changemechangemechangemechangeme}")
-  if [[ $WAZUH_CLUSTER_NODE_TYPE -eq "master" ]]; then
+  if [[ $WAZUH_CLUSTER_NODE_TYPE -eq "manager" ]]; then
     XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/nodes/node" -v $(hostname))
     XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/node_type" -v "master")
   else
-    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/nodes/node" -v "${WAZUH_CLUSTER_MASTER}")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/nodes/node" -v "${WAZUH_CLUSTER_MANAGER}")
     XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/node_type" -v "worker")
   fi
 
