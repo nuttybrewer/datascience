@@ -33,8 +33,9 @@ fi
 
 if [[ $WAZUH_AUTHD_AGENT_CA_DISABLED == "no" ]]; then
   echo "Turning on ssl_agent_ca check for authd"
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/auth/ssl_agent_ca" -v "/var/ossec/etc/rootCA.pem")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config/auth" -t elem -n "ssl_agent_ca" -v "/var/ossec/etc/rootCA.pem")
 fi
+
 # Output config file, strip the root elements first!
 echo $XML_CONFIG | xmlstarlet fo -o | tail -n +2 | head -n "-1" > /var/ossec/etc/ossec.conf
 
