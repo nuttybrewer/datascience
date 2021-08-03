@@ -28,13 +28,17 @@ if [[ $WAZUH_CLUSTER_DISABLED == "no" ]]; then
     XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/nodes/node" -v "${WAZUH_CLUSTER_MANAGER}")
     XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/node_type" -v "worker")
   fi
-
-  # Output config file, strip the root elements first!
-  echo $XML_CONFIG | xmlstarlet fo -o | tail -n +2 | head -n "-1" > /var/ossec/etc/ossec.conf
-
-  # Load up the config for the next batch of editing
-  XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
 fi
+
+if [[ $WAZUH_AUTHD_AGENT_CA_DISABLED == "no" ]]; then
+  echo "Turning on ssl_agent_ca check for authd"
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/auth/ssl_agent_ca" -v "/var/ossec/etc/rootCA.pem")
+fi
+# Output config file, strip the root elements first!
+echo $XML_CONFIG | xmlstarlet fo -o | tail -n +2 | head -n "-1" > /var/ossec/etc/ossec.conf
+
+# Load up the config for the next batch of editing
+XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
 
 service wazuh-manager start
 
