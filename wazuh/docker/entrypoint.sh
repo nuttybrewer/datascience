@@ -54,7 +54,7 @@ if [[ $FILEBEAT_ES_HOSTS ]]; then
   if [[ $FILEBEAT_ES_SSL_VERIFICATION_MODE ]]; then
     yq eval -i '.output.elasticsearch.ssl.["verification_mode"] = env(FILEBEAT_ES_SSL_VERIFICATION_MODE)' /etc/filebeat/filebeat.yml
   else
-    yq eval -i '.output.elasticsearch.ssl.["verification_mode"] = none' /etc/filebeat/filebeat.yml
+    yq eval -i '.output.elasticsearch.ssl.["verification_mode"] = "none"' /etc/filebeat/filebeat.yml
   fi
   if [[ $FILEBEAT_ES_USER ]]; then
     echo "Adding ${FILEBEAT_ES_USER} and password to /etc/filebeat/filebeat.yml"
