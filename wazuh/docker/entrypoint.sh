@@ -8,20 +8,23 @@ echo "FILEBEAT_ES_SSL_VERIFICATION_MODE: ${FILEBEAT_ES_SSL_VERIFICATION_MODE:-ce
 echo "FILEBEAT_ES_USER: ${FILEBEAT_ES_USER}"
 
 # echo "${WAZUH_CLUSTER_KEY}"
-echo "WAZUH_CLUSTER_MASTER: ${WAZUH_CLUSTER_NAME:-wazuh}"
+echo "WAZUH_CLUSTER_NAME: ${WAZUH_CLUSTER_NAME:-wazuh}"
 
 # The configuration file isn't valid XML, we need to wrap it in root tags
 XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
 
 # Edit the configuration file for cluster variables
-if [[ $WAZUH_CLUSTER_DISABLED -eq "no" ]]; then
+if [[ $WAZUH_CLUSTER_DISABLED == "no" ]]; then
+  echo "Configuring wazuh cluster"
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/node_name" -v $(hostname))
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/disabled" -v "no")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/key" -v "${WAZUH_CLUSTER_KEY:-changemechangemechangemechangeme}")
-  if [[ $WAZUH_CLUSTER_NODE_TYPE -eq "manager" ]]; then
+  if [[ $WAZUH_CLUSTER_NODE_TYPE == "manager" ]]; then
+    echo "Configuring node as a manager"
     XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/nodes/node" -v $(hostname))
     XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/node_type" -v "master")
   else
+    echo "Configuring node as a worker to connect to ${WAZUH_CLUSTER_MANAGER}"
     XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/nodes/node" -v "${WAZUH_CLUSTER_MANAGER}")
     XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/node_type" -v "worker")
   fi
