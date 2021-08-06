@@ -37,7 +37,7 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
       fi
     fi
   fi
-  # echo "${XML_CONFIG}" | xmlstarlet fo -o | tail -n +2 | head -n "-1" > /var/ossec/etc/ossec.conf
+  echo "${XML_CONFIG}" | xmlstarlet fo -o | tail -n +2 | head -n "-1" > /var/ossec/etc/ossec.conf
   XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
 fi
 
