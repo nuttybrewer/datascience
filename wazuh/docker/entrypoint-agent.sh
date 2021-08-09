@@ -30,7 +30,7 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
         XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config/client/enrollment" -t elem -n "agent_key_path" -v "${WAZUH_AGENT_ENROLLMENT_KEY_PATH}")
       fi
       if [[ ! -z $WAZUH_AGENT_ENROLLMENT_CERT_PATH ]]; then
-        XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config/client/enrollment" -t elem -n "agent_certification_path" -v "${WAZUH_AGENT_ENROLLMENT_CERT_PATH}")
+        XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config/client/enrollment" -t elem -n "agent_certificate_path" -v "${WAZUH_AGENT_ENROLLMENT_CERT_PATH}")
       fi
       if [[ ! -z $WAZUH_AGENT_ENROLLMENT_CRED_PATH ]]; then
         XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config/client/enrollment" -t elem -n "authorization_pass_path" -v "${WAZUH_AGENT_ENROLLMENT_CRED_PATH}")
