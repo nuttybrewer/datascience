@@ -37,8 +37,8 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
       fi
     fi
   fi
-  # Insert disabled wodles
 
+  # Insert disabled wodles
   # AWS
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config" -t elem -n "wodle_aws")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/wodle_aws" -t attr -n "name" -v "aws-s3")
