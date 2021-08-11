@@ -9,6 +9,12 @@ RUN echo "deb https://packages.wazuh.com/4.x/apt/ stable main" | tee -a /etc/apt
 RUN wget https://github.com/mikefarah/yq/releases/download/v4.11.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
 RUN apt update
 RUN apt -y install wazuh-manager filebeat
+RUN apt -y install wazuh-agent python3-pip
+RUN python3 -m pip install boto3
+RUN python3 -m pip install google-cloud-pubsub
+RUN python3 -m pip install docker
+# PIP installs build-essentials which we don't want bloating the image
+RUN apt -y purge python3-pip && apt -y autoremove
 ADD filebeat.yml /etc/filebeat/filebeat.yml
 RUN curl -so /etc/filebeat/wazuh-template.json https://raw.githubusercontent.com/wazuh/wazuh/4.1/extensions/elasticsearch/7.x/wazuh-template.json
 RUN chmod go+r /etc/filebeat/wazuh-template.json

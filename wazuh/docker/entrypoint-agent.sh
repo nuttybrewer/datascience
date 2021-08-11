@@ -51,7 +51,6 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_aws" -v "wodle")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws" -t elem -n "service")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_aws/service" -t attr -n "type" -v "cloudwatchlogs")
-  echo $XML_CONFIG | xmlstarlet fo -o
 
   # Azure - Doesn't work on agent, needs to be configured on manager
   # echo "Configuring empty Azure-logs Wodle"
@@ -71,6 +70,7 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
     echo "{}" > /var/ossec/etc/credentials.json
   fi
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "credentials_file" -v "/var/ossec/etc/credentials.json")
+
   # Docker
   echo "Configuring empty docker-listener wodle"
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_docker")
@@ -81,6 +81,7 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
   # Insert disabled wodles
   ###
 
+  echo $XML_CONFIG | xmlstarlet fo -o
   echo "${XML_CONFIG}" | xmlstarlet fo -o | tail -n +2 | head -n "-1" > /var/ossec/etc/ossec.conf
   XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
 fi
