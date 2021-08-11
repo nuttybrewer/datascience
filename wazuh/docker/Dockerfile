@@ -8,8 +8,7 @@ RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add -
 RUN echo "deb https://packages.wazuh.com/4.x/apt/ stable main" | tee -a /etc/apt/sources.list.d/wazuh.list
 RUN wget https://github.com/mikefarah/yq/releases/download/v4.11.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
 RUN apt update
-RUN apt -y install wazuh-manager filebeat
-RUN apt -y install wazuh-agent python3-pip
+RUN apt -y install wazuh-manager filebeat python3-pip
 RUN python3 -m pip install boto3
 RUN python3 -m pip install google-cloud-pubsub
 RUN python3 -m pip install docker
