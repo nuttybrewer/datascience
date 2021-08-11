@@ -1,0 +1,166 @@
+# Default values for wazuh helm chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+wazuh:
+  serviceAccountName: wazuh
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+  configDirectory: /var/ossec
+  cluster:
+    enabled: true
+    # name: wazuh
+    # key: changemechangemechangemechangeme
+  authd:
+    enabled: true
+    # sslAgentCaEnabled: true
+    agentPassphraseEnabled: true
+    agentPassphrase: changemechangemechangemechangeme
+  agent:
+    enabled: false
+    syslogEnabled: false
+    # serviceAnnotations:
+    #   - service.beta.kubernetes.io/aws-load-balancer-type: external
+    #   - service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    #   - service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    imageRegistry: dockerh.redlabnet.com
+    image: redlabnet/wazuh-agent
+    imageTag: 4.X
+    replicaCount: 1
+    resources: {}
+    podAnnotations: {}
+    persistence: {}
+    securityContext: {}
+    podSecurityContext: {}
+      # fsGroup: 2000
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+  manager:
+    enabled: true
+    imageRegistry: dockerh.redlabnet.com
+    image: redlabnet/wazuh-manager
+    imageTag: 4.X
+    # config: |
+      # <ossec_config>
+      # ...
+      # </ossec_config
+    filebeat:
+      enabled: false
+    # config: |
+      # output:
+      #   elasticsearch:
+      #     hosts: []
+      #     protocol: https
+      #     username: "admin"
+      #     password: "admin"
+    persistence: {}
+    securityContext: {}
+      # capabilities:
+      #   drop:
+      #   - ALL
+      # readOnlyRootFilesystem: true
+      # runAsNonRoot: true
+      # runAsUser: 1000
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #   cpu: 100m
+      #   memory: 128Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 128Mi
+    podAnnotations: {}
+    podSecurityContext: {}
+      # fsGroup: 2000
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+  worker:
+    enabled: true
+    imageRegistry: dockerh.redlabnet.com
+    image: redlabnet/wazuh-manager
+    imageTag: 4.X
+    # config: |
+      # <ossec_config>
+      # ...
+      # </ossec_config
+
+    filebeat:
+      enabled: false
+    # config: |
+      # output:
+      #   elasticsearch:
+      #     hosts: []
+      #     protocol: https
+      #     username: "admin"
+      #     password: "admin"
+    serviceAnnotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: external
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    replicaCount: 2
+    securityContext: {}
+      # capabilities:
+      #   drop:
+      #   - ALL
+      # readOnlyRootFilesystem: true
+      # runAsNonRoot: true
+      # runAsUser: 1000
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #   cpu: 100m
+      #   memory: 128Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 128Mi
+    # off by default
+    autoscaling:
+      enabled: false
+      minReplicas: 2
+      maxReplicas: 100
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    podAnnotations: {}
+    podSecurityContext: {}
+      # fsGroup: 2000
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+  ssl:
+    api:
+      enabled: false
+      # existingCertSecret: mywazuh-api-certs
+      # existingCertSecretKeySubPath: wazuh-api-key.pem
+      # existingCertSecretCertSubPath: wazuh-api-cert.pem
+      # existingCertSecretChainSubPath: wazuh-api-root-ca.pem
+    filebeat:
+      enabled: false
+      # existingCertSecret: mywazuh-filebeat-certs
+      # existingCertSecretKeySubPath: filebeat-key.pem
+      # existingCertSecretCertSubPath: filebeat-cert.pem
+      # existingCertSecretChainSubPath: filebeat-root-ca.pem
+    authd:
+      enabled: false
+      # existingCertSecret: mywazuh-authd-certs
+      # existingCertSecretKeySubPath: wazuh-authd-key.pem
+      # existingCertSecretCertSubPath: wazuh-authd-cert.pem
+      # existingCertSecretChainSubPath: wazuh-authd-root-ca.pem
+    agent:
+      enabled: false
+      # existingCertSecret: mywazuh-agent-certs
+      # existingCertSecretKeySubPath: wazuh-agent-key.pem
+      # existingCertSecretCertSubPath: wazuh-agent-cert.pem
+      # existingCertSecretChainSubPath: wazuh-agent-root-ca.pem

@@ -1,0 +1,28 @@
+# @formatter:off
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    role: manager
+{{ include "wazuh.labels" . | indent 4 }}
+  name: {{ .Release.Name }}-worker-svc
+  namespace: {{ .Release.Namespace }}
+  {{- with .Values.wazuh.worker.serviceAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ports:
+  - port: 1514
+    targetPort: 1514
+    protocol: TCP
+    name: agent-data-tcp-svc
+  {{- if .Values.wazuh.authd.enabled }}
+  - port: 1515
+    targetPort: 1515
+    protocol: TCP
+    name: agent-authd-tcp-svc
+  {{- end }}{{/* authd.enabled */}}
+  type: LoadBalancer
+  selector:
+    role: worker

@@ -1,0 +1,15 @@
+# @formatter:off
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    role: manager
+  name: {{ .Release.Name }}-api-svc
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - port: 55000
+    name: api-svc
+  clusterIP: None
+  selector:
+    role: manager

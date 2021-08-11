@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    role: manager
+{{ include "wazuh.labels" . | indent 4 }}
+  name: {{ .Release.Name }}-manager
+  namespace: {{ .Release.Namespace }}
+spec:
+  serviceName: {{ .Release.Name }}-manager
+  replicas: {{ .Values.wazuh.manager.replicaCount }}
+  selector:
+    matchLabels:
+      role: manager
+      {{- include "wazuh.selectorLabels" . | nindent 6 }}
+  updateStrategy:
+    type: {{ .Values.wazuh.manager.updateStrategy | default "RollingUpdate" | quote }}
+  template:
+    metadata:
+      labels:
+        role: manager
+{{ include "wazuh.labels" . | indent 8 }}
+      annotations:
+        {{/* This forces a restart if the secret config has changed */}}
+        {{- if .Values.wazuh.manager.config }}
+        configchecksum: {{ include (print .Template.BasePath "/wazuh-config-secret.yaml") . | sha256sum | trunc 63 }}
+        {{- end }}
+{{- if .Values.wazuh.manager.podAnnotations }}
+{{ toYaml .Values.wazuh.manager.podAnnotations | indent 8 }}
+{{- end }}
+    spec:
+      serviceAccountName: {{ template "wazuh.serviceAccountName" . }}
+      containers:
+      - name: manager
+        # Redlabnet Server Image
+        image: {{ .Values.wazuh.manager.imageRegistry }}/{{ .Values.wazuh.manager.image }}:{{ .Values.wazuh.manager.imageTag }}
+        imagePullPolicy: {{ .Values.wazuh.manager.imagePullPolicy | default "Always" | quote }}
+        env:
+          - name: WAZUH_CLUSTER_NODE_TYPE
+            value: "manager"
+          {{- if .Values.wazuh.cluster.enabled }}
+          - name: WAZUH_CLUSTER_DISABLED
+            value: "no"
+          {{- if .Values.wazuh.cluster.name}}
+          - name: WAZUH_CLUSTER_NAME
+            value: {{ .Values.wazuh.cluster.name }}
+          {{- end }}
+          {{- if .Values.wazuh.cluster.key }}
+          - name: WAZUH_CLUSTER_KEY
+            value: {{ .Values.wazuh.cluster.key | quote }}
+          {{- end }}
+          {{- end }}
+          {{- if and .Values.wazuh.manager.filebeat .Values.wazuh.manager.filebeat.enabled }}
+          - name: FILEBEAT_ES_HOSTS
+            value: {{ .Values.wazuh.manager.filebeat.es_hosts | toJson | squote }}
+          {{- if .Values.wazuh.manager.filebeat.es_username }}
+          - name: FILEBEAT_ES_USER
+            value: {{ .Values.wazuh.manager.filebeat.es_username }}
+          {{- end }}
+          {{- if .Values.wazuh.manager.filebeat.es_password }}
+          - name: FILEBEAT_ES_PASS
+            value: {{ .Values.wazuh.manager.filebeat.es_password }}
+          {{- end }}
+          {{- end }}
+        ports:
+        - name: api-https
+          containerPort: 55000
+          protocol: TCP
+        - name: cluster-mgmt
+          containerPort: 1516
+          protocol: TCP
+        resources:
+{{ toYaml .Values.wazuh.manager.resources | indent 12 }}
+        livenessProbe:
+          initialDelaySeconds: {{ .Values.wazuh.manager.initialDelaySeconds | default 30 }}
+          periodSeconds: {{ .Values.wazuh.manager.periodSeconds | default 30 }}
+          failureThreshold: {{ .Values.wazuh.manager.failureThreshold | default 3 }}
+          tcpSocket:
+            port: api-https
+        readinessProbe:
+          initialDelaySeconds: {{ .Values.wazuh.manager.initialDelaySeconds | default 30 }}
+          periodSeconds: {{ .Values.wazuh.manager.periodSeconds | default 30 }}
+          failureThreshold: {{ .Values.wazuh.manager.failureThreshold | default 3 }}
+          tcpSocket:
+            port: api-https
+
+        volumeMounts:
+          {{- if .Values.wazuh.manager.config }}
+          - mountPath: {{ .Values.wazuh.configDirectory }}/etc/ossec.conf
+            name: {{ .Release.Name }}-manager-ossec-conf
+            subPath: ossec.conf
+          {{- end }}
+          {{- if .Values.wazuh.ssl.api.enabled }}
+          - mountPath: {{ .Values.wazuh.configDirectory }}/api/configuration/ssl/server.crt
+            name: {{ .Release.Name }}-api-certs
+            subPath: {{ .Values.wazuh.ssl.api.existingCertSecretCertSubPath }}
+          - mountPath: {{ .Values.wazuh.configDirectory }}/api/configuration/ssl/server.key
+            name: {{ .Release.Name }}-api-certs
+            subPath: {{ .Values.wazuh.ssl.api.existingCertSecretKeySubPath }}
+          {{- end }}
+          {{- if .Values.wazuh.manager.filebeat.enabled }}
+          {{- if .Values.wazuh.manager.filebeat.config }}
+          - mountPath: /etc/filebeat/filebeat.yml
+            name: {{ .Release.Name }}-manager-filebeat-conf
+            subPath: filebeat.yml
+          {{- end }}
+          {{- if .Values.wazuh.ssl.filebeat.enabled }}
+          - mountPath: /etc/filebeat/certs/filebeat.pem
+            name: {{ .Release.Name }}-filebeat-certs
+            subPath: {{ .Values.wazuh.ssl.filebeat.existingCertSecretCertSubPath }}
+          - mountPath: /etc/filebeat/certs/filebeat-key.pem
+            name: {{ .Release.Name }}-filebeat-certs
+            subPath: {{ .Values.wazuh.ssl.filebeat.existingCertSecretKeySubPath }}
+          - mountPath: /etc/filebeat/certs/root-ca.pem
+            name: {{ .Release.Name }}-filebeat-certs
+            subPath: {{ .Values.wazuh.ssl.filebeat.existingCertSecretChainSubPath }}
+          {{- end }}
+          {{- end }}
+{{- if .Values.wazuh.extraVolumeMounts }}
+{{ toYaml .Values.wazuh.extraVolumeMounts | indent 8 }}
+{{- end }}
+      volumes:
+      {{- if .Values.wazuh.manager.config }}
+      - name: {{ .Release.Name }}-manager-ossec-conf
+        secret:
+          secretName: {{ .Release.Name }}-manger-ossec-conf
+      {{- end }}
+      {{- if .Values.wazuh.manager.filebeat.enabled }}
+      {{- if .Values.wazuh.manager.filebeat.config }}
+      - name: {{ .Release.Name }}-manager-filebeat-conf
+        secret:
+          secretName: {{ .Release.Name }}-manager-filebeat-conf
+      {{- end }}
+      {{- end }}
+      {{- if .Values.wazuh.ssl.api.enabled }}
+      - name: {{ .Release.Name }}-api-certs
+        secret:
+          secretName: {{ .Values.wazuh.ssl.api.existingCertSecret }}
+      {{- end }}
+      {{- if .Values.wazuh.manager.filebeat.enabled }}
+      {{- if .Values.wazuh.ssl.filebeat.enabled }}
+      - name: {{ .Release.Name }}-filebeat-certs
+        secret:
+          secretName: {{ .Values.wazuh.ssl.filebeat.existingCertSecret }}
+      {{- end }}
+      {{- end }}
+{{- if .Values.wazuh.manager.extraVolumes }}
+{{ toYaml .Values.wazuh.manager.extraVolumes | indent 6 }}
+{{- end }}

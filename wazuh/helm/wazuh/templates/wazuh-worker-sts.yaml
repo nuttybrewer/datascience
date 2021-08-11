@@ -1,0 +1,204 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    role: worker
+{{ include "wazuh.labels" . | indent 4 }}
+  name: {{ .Release.Name }}-worker
+  namespace: {{ .Release.Namespace }}
+spec:
+  serviceName: {{ .Release.Name }}-worker
+  replicas: {{ .Values.wazuh.worker.replicaCount }}
+  selector:
+    matchLabels:
+      role: worker
+      {{- include "wazuh.selectorLabels" . | nindent 6 }}
+  updateStrategy:
+    type: {{ .Values.wazuh.worker.updateStrategy | default "RollingUpdate" | quote }}
+  template:
+    metadata:
+      {{- with .Values.wazuh.worker.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        role: worker
+{{ include "wazuh.labels" . | indent 8 }}
+    spec:
+      {{- with .Values.wazuh.worker.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.wazuh.worker.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ template "wazuh.serviceAccountName" . }}
+      containers:
+      - name: worker
+        securityContext:
+          {{- toYaml .Values.wazuh.worker.securityContext | nindent 12 }}
+        image: {{ .Values.wazuh.worker.imageRegistry }}/{{ .Values.wazuh.worker.image }}:{{ .Values.wazuh.worker.imageTag }}
+        imagePullPolicy: {{ .Values.wazuh.worker.imagePullPolicy | default "Always" | quote }}
+        env:
+          {{- if .Values.wazuh.worker.config }}
+          - name: WAZUH_CONFIG_USE_MOUNTED_VOLUME
+            value: "yes"
+          {{- else }}
+          - name: WAZUH_CLUSTER_DISABLED
+            value: "no"
+          - name: WAZUH_CLUSTER_NODE_TYPE
+            value: "worker"
+          - name: WAZUH_CLUSTER_MANAGER
+            value: "{{ .Release.Name }}-cluster-mgmt-svc"
+          {{- if .Values.wazuh.cluster }}
+          {{- if .Values.wazuh.cluster.name}}
+          - name: WAZUH_CLUSTER_NAME
+            value: {{ .Values.wazuh.cluster.name }}
+          {{- end }} {{/* .cluster.name */}}
+          {{- if .Values.wazuh.cluster.key }}
+          - name: WAZUH_CLUSTER_KEY
+            value: {{ .Values.wazuh.cluster.key }}
+          {{- end }}{{/* .cluster.key */}}
+          {{- end }}{{/* .cluster */}}
+          {{- if .Values.wazuh.authd }}
+          - name: WAZUH_AUTHD_DISABLED
+            value: "no"
+          {{- if.Values.wazuh.authd.ssl_agent_ca_enabled }}
+          - name: WAZUH_AUTHD_AGENT_CA_DISABLED
+            value: "no"
+          {{- end }}{{/* authd.ssl_agent_ca_enabled */}}
+          {{- if .Values.wazuh.authd.agentPassphraseEnabled }}
+          - name: WAZUH_AUTHD_AGENT_PASSPHRASE_DISABLED
+            value: "no"
+          {{- end }}{{/* authd.agentPassphraseEnabled */}}
+          {{- end }}{{/* authd */}}
+          {{- end }}{{/* worker.config */}}
+          {{- if .Values.wazuh.worker.filebeat.enabled }}
+          {{- if .Values.wazuh.worker.filebeat.config }}
+          - name: FILEBEAT_CONFIG_USE_MOUNTED_VOLUME
+            value: yes
+          {{- else }}
+          - name: FILEBEAT_ES_HOSTS
+            value: {{ .Values.wazuh.worker.filebeat.es_hosts | toJson | squote }}
+          {{- if .Values.wazuh.worker.filebeat.es_username }}
+          - name: FILEBEAT_ES_USER
+            value: {{ .Values.wazuh.worker.filebeat.es_username }}
+          {{- end }}{{/* filebeat.es_username */}}
+          {{- if .Values.wazuh.worker.filebeat.es_password }}
+          - name: FILEBEAT_ES_PASS
+            value: {{ .Values.wazuh.worker.filebeat.es_password }}
+          {{- end }}{{/* filebeat.es_password */}}
+          {{- end }}{{/* filebeat.enabled */}}
+          {{- end }}{{/* filebeat.config */}}
+        ports:
+          - name: agent-1514-tcp
+            containerPort: 1514
+            protocol: TCP
+          - name: agent-1515-tcp
+            containerPort: 1515
+            protocol: TCP
+          - name: agent-1515-udp
+            containerPort: 1515
+            protocol: UDP
+        livenessProbe:
+          initialDelaySeconds: {{ .Values.wazuh.worker.initialDelaySeconds | default 30 }}
+          periodSeconds: {{ .Values.wazuh.worker.periodSeconds | default 30 }}
+          failureThreshold: {{ .Values.wazuh.worker.failureThreshold | default 3 }}
+          tcpSocket:
+            port: agent-1515-tcp
+        readinessProbe:
+          initialDelaySeconds: {{ .Values.wazuh.worker.initialDelaySeconds | default 30 }}
+          periodSeconds: {{ .Values.wazuh.worker.periodSeconds | default 30 }}
+          failureThreshold: {{ .Values.wazuh.worker.failureThreshold | default 3}}
+          tcpSocket:
+            port: agent-1515-tcp
+        resources:
+          {{- toYaml .Values.wazuh.worker.resources | nindent 12 }}
+        volumeMounts:
+          {{- if .Values.wazuh.worker.config }}
+          - mountPath: {{ .Values.wazuh.configDirectory }}/etc/ossec.conf
+            name: {{ .Release.Name }}-worker-ossec-conf
+            subPath: ossec.conf
+          {{- end }}{{/* worked.config */}}
+          {{- if .Values.wazuh.authd.enabled }}
+          {{- if .Values.wazuh.authd.agentPassphrase }}
+          - mountPath: {{ .Values.wazuh.configDirectory }}/etc/authd.pass
+            name: {{ .Release.Name }}-authd-passphrase-file
+            subPath: authd.pass
+          {{- end }}{{/* authd.agentPassphrase */}}
+          {{- if .Values.wazuh.ssl.authd.enabled }}
+          - mountPath: {{ .Values.wazuh.configDirectory }}/etc/sslmanager.cert
+            name: {{ .Release.Name }}-authd-certs
+            subPath: {{ .Values.wazuh.ssl.authd.existingCertSecretCertSubPath }}
+          - mountPath: {{ .Values.wazuh.configDirectory }}/etc/sslmanager.key
+            name: {{ .Release.Name }}-authd-certs
+            subPath: {{ .Values.wazuh.ssl.authd.existingCertSecretKeySubPath }}
+          - mountPath: {{ .Values.wazuh.configDirectory }}/etc/rootCA.pem
+            name: {{ .Release.Name }}-authd-certs
+            subPath: {{ .Values.wazuh.ssl.authd.existingCertSecretChainSubPath }}
+          {{- end }}{{/* ssl.authd.enabled */}}
+          {{- end }}{{/* authd.enabled */}}
+          {{- if .Values.wazuh.worker.filebeat.enabled }}
+          {{- if .Values.wazuh.worker.filebeat.config }}
+          - mountPath: /etc/filebeat/filebeat.yml
+            name: {{ .Release.Name }}-worker-filebeat-conf
+            subPath: filebeat.yml
+          {{- end }}{{/* worker.filebeat.config */}}
+          {{- if .Values.wazuh.ssl.filebeat.enabled }}
+          - mountPath: /etc/filebeat/certs/filebeat.pem
+            name: {{ .Release.Name }}-filebeat-certs
+            subPath: {{ .Values.wazuh.ssl.filebeat.existingCertSecretCertSubPath }}
+
+          - mountPath: /etc/filebeat/certs/filebeat-key.pem
+            name: {{ .Release.Name }}-filebeat-certs
+            subPath: {{ .Values.wazuh.ssl.filebeat.existingCertSecretKeySubPath }}
+
+          - mountPath: /etc/filebeat/certs/root-ca.pem
+            name: {{ .Release.Name }}-filebeat-certs
+            subPath: {{ .Values.wazuh.ssl.filebeat.existingCertSecretChainSubPath }}
+          {{- end }}{{/* ssl.filebeat.enabled */}}
+          {{- end }}{{/* worker.filebeat.enabled */}}
+{{- if .Values.wazuh.extraVolumeMounts }}
+{{ toYaml .Values.wazuh.extraVolumeMounts | indent 8 }}
+{{- end }}
+      volumes:
+      {{- if .Values.wazuh.worker.config }}
+      - name: {{ .Release.Name }}-worker-ossec-conf
+        secret:
+          secretName: {{ .Release.Name }}-worker-ossec-conf
+      {{- end }}{{/* worker.config */}}
+      {{- if .Values.wazuh.worker.filebeat.enabled }}
+      {{- if .Values.wazuh.worker.filebeat.config }}
+      - name: {{ .Release.Name }}-worker-filebeat-conf
+        secret:
+          secretName: {{ .Release.Name }}-worker-filebeat-conf
+      {{- end }}{{/* worker.filebeat.conf */}}
+      {{- end }}{{/* worker.filebeat.enabled */}}
+      {{- if .Values.wazuh.authd.agentPassphrase }}
+      - name: {{ .Release.Name }}-authd-passphrase-file
+        secret:
+          secretName: {{ .Release.Name }}-authd-passphrase-file
+      {{- end }}{{/* authd.agentPassphrase */}}
+      {{- if .Values.wazuh.ssl.authd.enabled }}
+      - name: {{ .Release.Name }}-authd-certs
+        secret:
+          secretName: {{ .Values.wazuh.ssl.authd.existingCertSecret }}
+      {{- end }}{{/* ssl.authd.enabled */}}
+      {{- if .Values.wazuh.worker.filebeat.enabled }}
+      {{- if .Values.wazuh.ssl.filebeat.enabled }}
+      - name: {{ .Release.Name }}-filebeat-certs
+        secret:
+          secretName: {{ .Values.wazuh.ssl.filebeat.existingCertSecret }}
+      {{- end }}{{/* worker.filebeat.enabled*/}}
+      {{- end }}{{/* ssl.filebeat.enabled */}}
+      {{- with .Values.wazuh.worker.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.wazuh.worker.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.wazuh.worker.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

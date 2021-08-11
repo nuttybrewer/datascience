@@ -1,0 +1,99 @@
+{{ if .Values.wazuh.agent.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    role: agent
+{{ include "wazuh.labels" . | indent 4 }}
+  name: {{ .Release.Name }}-agent
+  namespace: {{ .Release.Namespace }}
+spec:
+  serviceName: {{ .Release.Name }}-agent
+  replicas: {{ .Values.wazuh.agent.replicaCount }}
+  selector:
+    matchLabels:
+      role: agent
+      {{- include "wazuh.selectorLabels" . | nindent 6 }}
+  updateStrategy:
+    type: {{ .Values.wazuh.agent.updateStrategy | default "RollingUpdate" | quote }}
+  template:
+    metadata:
+      labels:
+        role: agent
+{{ include "wazuh.labels" . | indent 8 }}
+      annotations:
+{{- if .Values.wazuh.agent.podAnnotations }}
+{{ toYaml .Values.wazuh.agent.podAnnotations | indent 8 }}
+{{- end }}
+    spec:
+      serviceAccountName: {{ template "wazuh.serviceAccountName" . }}
+      containers:
+      - name: agent
+        # Redlabnet Agent Image
+        image: {{ .Values.wazuh.agent.imageRegistry }}/{{ .Values.wazuh.agent.image }}:{{ .Values.wazuh.agent.imageTag }}
+        imagePullPolicy: {{ .Values.wazuh.agent.imagePullPolicy | default "Always" | quote }}
+        env:
+          - name: WAZUH_AGENT_DISABLED
+            value: "no"
+          - name: WAZUH_AGENT_SERVICE_ADDRESS
+            value: {{ .Release.Name }}-worker-svc
+          - name: WAZUH_AGENT_ENROLLMENT_DISABLED
+            value: "no"
+          - name: WAZUH_AGENT_ENROLLMENT_MANAGER_ADDRESS
+            value: "{{ .Release.Name }}-worker-svc"
+          {{- if .Values.wazuh.ssl.agent.enabled }}
+          - name: WAZUH_AGENT_ENROLLMENT_CA_PATH
+            value: "{{ .Values.wazuh.configDirectory }}/etc/rootCA.pem"
+          - name: WAZUH_AGENT_ENROLLMENT_KEY_PATH
+            value: "{{ .Values.wazuh.configDirectory }}/etc/agent.key"
+          - name: WAZUH_AGENT_ENROLLMENT_CERT_PATH
+            value: "{{ .Values.wazuh.configDirectory }}/etc/agent.crt"
+          {{- end }}
+        resources:
+{{ toYaml .Values.wazuh.agent.resources | indent 12 }}
+        volumeMounts:
+          {{- if .Values.wazuh.agent.config }}
+          - mountPath: {{ .Values.wazuh.configDirectory }}/etc/ossec.conf
+            name: {{ .Release.Name }}-ossec-conf
+            subPath: ossec.conf
+          {{- end }}
+          {{- if and .Values.wazuh.authd.agentPassphraseEnabled .Values.wazuh.authd.agentPassphrase }}
+          - mountPath: {{ .Values.wazuh.configDirectory }}/etc/authd.pass
+            name: {{ .Release.Name }}-authd-passphrase-file
+            subPath: authd.pass
+          {{- end }}{{/* authd.agentPassphraseEnabled and authd.agentPassphrase */}}
+          {{- if .Values.wazuh.ssl.agent.enabled }}
+          - mountPath: {{ .Values.wazuh.configDirectory }}/etc/agent.crt
+            name: {{ .Release.Name }}-agent-certs
+            subPath: {{ .Values.wazuh.ssl.agent.existingCertSecretCertSubPath }}
+          - mountPath: {{ .Values.wazuh.configDirectory }}/etc/agent.key
+            name: {{ .Release.Name }}-agent-certs
+            subPath: {{ .Values.wazuh.ssl.agent.existingCertSecretKeySubPath }}
+          - mountPath: {{ .Values.wazuh.configDirectory }}/etc/rootCA.pem
+            name: {{ .Release.Name }}-agent-certs
+            subPath: {{ .Values.wazuh.ssl.agent.existingCertSecretChainSubPath }}
+          {{- end }}
+{{- if .Values.wazuh.agent.extraVolumeMounts }}
+{{ toYaml .Values.wazuh.agent.extraVolumeMounts | indent 8 }}
+{{- end }}
+      volumes:
+      {{- if .Values.wazuh.agent.config }}
+      - name: {{ .Release.Name }}-ossec-conf
+        secret:
+          secretName: {{ .Release.Name }}-ossec-conf
+      {{- end }}
+      {{- if and .Values.wazuh.ssl.agent .Values.wazuh.ssl.agent.enabled }}
+      - name: {{ .Release.Name }}-agent-certs
+        secret:
+          secretName: {{ .Values.wazuh.ssl.agent.existingCertSecret }}
+      {{- end }}
+      {{- if and .Values.wazuh.authd.agentPassphraseEnabled .Values.wazuh.authd.agentPassphrase }}
+      - name: {{ .Release.Name }}-authd-passphrase-file
+        secret:
+          secretName: {{ .Release.Name }}-authd-passphrase-file
+      {{- end }}{{/* authd.agentPassphraseEnabled and authd.agentPassphrase */}}
+{{- if .Values.wazuh.agent.extraVolumes }}
+{{ toYaml .Values.wazuh.agent.extraVolumes | indent 6 }}
+{{- end }}
+
+{{ end }}
