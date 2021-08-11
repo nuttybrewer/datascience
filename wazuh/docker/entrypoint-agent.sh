@@ -53,21 +53,23 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
   echo $XML_CONFIG | xmlstarlet fo -o
 
   # Azure
-  # echo "Configuring empty Azure-logs Wodle"
-  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_azure")
-  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_azure" -t attr -n "name" -v "azure-logs")
-  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_azure" -t elem -n "disabled" -v "yes")
-  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_azure" -v "wodle")
+  echo "Configuring empty Azure-logs Wodle"
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_azure")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_azure" -t attr -n "name" -v "azure-logs")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_azure" -t elem -n "disabled" -v "yes")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_azure" -v "wodle")
 
   # GCP
-  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "gcp-pubsub")
-  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "enabled" -v "no")
+  echo "Configuring empty GCP plugin"
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "gcp-pubsub")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "enabled" -v "no")
 
   # Docker
-  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_docker")
-  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_docker" -t attr -n "name" -v "docker-listener")
-  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_docker" -t elem -n "disabled" -v "yes")
-  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_docker" -v "wodle")
+  echo "Configuring empty docker-listener wodle"
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_docker")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_docker" -t attr -n "name" -v "docker-listener")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_docker" -t elem -n "disabled" -v "yes")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_docker" -v "wodle")
 
   # Insert disabled wodles
   ###
