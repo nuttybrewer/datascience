@@ -11,6 +11,8 @@ RUN apt -y install wazuh-agent python3-pip
 RUN python3 -m pip install boto3
 RUN python3 -m pip install google-cloud-pubsub
 RUN python3 -m pip install docker
+# PIP installs build-essentials which we don't want bloating the image
+RUN apt -y purge python3-pip && apt -y autoremove
 RUN update-rc.d wazuh-agent defaults 95 10
 ADD entrypoint-agent.sh /docker-entrypoint.sh
 RUN chmod o+x /docker-entrypoint.sh
