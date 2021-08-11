@@ -65,7 +65,7 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "gcp-pubsub")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "enabled" -v "no")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "project_id" -v "someprojectid")
-
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "subscription_name" -v "somesubscriptionname")
   # Docker
   echo "Configuring empty docker-listener wodle"
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_docker")
