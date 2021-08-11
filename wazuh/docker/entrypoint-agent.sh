@@ -53,17 +53,18 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_aws/service" -t attr -n "type" -v "cloudwatchlogs")
   echo $XML_CONFIG | xmlstarlet fo -o
 
-  # Azure
-  echo "Configuring empty Azure-logs Wodle"
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_azure")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_azure" -t attr -n "name" -v "azure-logs")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_azure" -t elem -n "disabled" -v "yes")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_azure" -v "wodle")
+  # Azure - Doesn't work on agent, needs to be configured on manager
+  # echo "Configuring empty Azure-logs Wodle"
+  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_azure")
+  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_azure" -t attr -n "name" -v "azure-logs")
+  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_azure" -t elem -n "disabled" -v "yes")
+  # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_azure" -v "wodle")
 
   # GCP
   echo "Configuring empty GCP plugin"
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "gcp-pubsub")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "enabled" -v "no")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "project_id" -v "someprojectid")
 
   # Docker
   echo "Configuring empty docker-listener wodle"
