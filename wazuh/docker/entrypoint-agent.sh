@@ -38,7 +38,9 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
     fi
   fi
 
+  ###
   # Insert disabled wodles
+
   # AWS
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config" -t elem -n "wodle_aws")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/wodle_aws" -t attr -n "name" -v "aws-s3")
@@ -61,6 +63,8 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config/wodle_docker" -t elem -n "disabled" -v "yes")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -m "/root/ossec_config/wodle_docker" "/root/ossec_config/wodle")
 
+  # Insert disabled wodles
+  ###
 
   echo "${XML_CONFIG}" | xmlstarlet fo -o | tail -n +2 | head -n "-1" > /var/ossec/etc/ossec.conf
   XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
