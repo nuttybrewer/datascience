@@ -7,7 +7,7 @@ RUN apt -y install curl apt-transport-https lsb-release gnupg procps net-tools w
 RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add -
 RUN echo "deb https://packages.wazuh.com/4.x/apt/ stable main" | tee -a /etc/apt/sources.list.d/wazuh.list
 RUN apt update
-RUN apt -y install wazuh-agent
+RUN apt -y install wazuh-agent python3-boto3
 RUN update-rc.d wazuh-agent defaults 95 10
 ADD entrypoint-agent.sh /docker-entrypoint.sh
 RUN chmod o+x /docker-entrypoint.sh
