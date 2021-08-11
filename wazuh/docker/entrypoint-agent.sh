@@ -49,6 +49,8 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws/bucket" -t elem -n "name" -v "mycustombucket.example")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws/bucket" -t elem -n "type" -v "custom")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_aws" -v "wodle")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws" -t elem -n "service")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_aws/service" -t attr -n "type" -v "cloudwatchlogs")
   echo $XML_CONFIG | xmlstarlet fo -o
 
   # Azure
