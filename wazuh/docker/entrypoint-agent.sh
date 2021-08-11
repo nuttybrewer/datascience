@@ -41,13 +41,13 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
 
   # AWS
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config" -t elem -n "wodle_aws")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config/wodle_aws" -t attr -n "name"-v "aws-s3")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/wodle_aws" -t attr -n "name"-v "aws-s3")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config/wodle_aws" -t elem -n "disabled" -v "yes")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -m "/root/ossec_config/wodle-aws" "/root/ossec_config/wodle")
 
   # Azure
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config" -t elem -n "wodle_azure")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config/wodle_azure" -t attr -n "name"-v "azure-logs")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/wodle_azure" -t attr -n "name"-v "azure-logs")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config/wodle_azure" -t elem -n "disabled" -v "yes")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -m "/root/ossec_config/wodle_azure" "/root/ossec_config/wodle")
 
@@ -57,7 +57,7 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
 
   # Docker
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config" -t elem -n "wodle_docker")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config/wodle_docker" -t attr -n "name"-v "docker-listener")
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/wodle_docker" -t attr -n "name"-v "docker-listener")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config/wodle_docker" -t elem -n "disabled" -v "yes")
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -m "/root/ossec_config/wodle_docker" "/root/ossec_config/wodle")
 
