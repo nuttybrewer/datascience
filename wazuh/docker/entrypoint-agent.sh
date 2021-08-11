@@ -42,10 +42,23 @@ if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
   # Insert disabled wodles
 
   # AWS
+  echo "Configuring Empty AWS Wodle"
+  echo "Adding wodle_aws"
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_aws")
+  echo "Added wodle_aws"
+  echo $XML_CONFIG | xmlstarlet fo -o
+  echo "Adding name=aws-s3"
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_aws" -t attr -n "name" -v "aws-s3")
+  echo "Added name=aws-s3"
+  echo $XML_CONFIG | xmlstarlet fo -o
+  echo "Disabling wodle"
   XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws" -t elem -n "disabled" -v "yes")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -m "/root/ossec_config[1]/wodle_aws" -v "wodle")
+  echo "Wodle disabled"
+  echo $XML_CONFIG | xmlstarlet fo -o
+  echo "Renaming wodle"
+  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_aws" -v "wodle")
+  echo "Wodle renamed"
+  echo $XML_CONFIG | xmlstarlet fo -o
 
   # Azure
   # XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config" -t elem -n "wodle_azure")
