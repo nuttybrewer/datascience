@@ -101,6 +101,8 @@ if [[ ! -e "/var/ossec/etc/initialized" ]]; then
     XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
   fi
   touch /var/ossec/etc/initialized
+else
+  echo "This container has previously been initialized. To cause it to reset, please delete the file /var/ossec/etc/initialized"
 fi
 service wazuh-manager start
 
