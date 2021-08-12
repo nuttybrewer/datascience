@@ -49,7 +49,7 @@ if [[ ! -e "/var/ossec/etc/initialized" ]]; then
         XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config/auth" -t elem -n "ssl_agent_ca" -v "${WAZUH_AUTHD_AGENT_CA_PATH:-/var/ossec/etc/rootCA.pem}")
       fi
     else
-      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/disabled" -v "yes")
+      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/auth/disabled" -v "yes")
     fi
 
     ###
