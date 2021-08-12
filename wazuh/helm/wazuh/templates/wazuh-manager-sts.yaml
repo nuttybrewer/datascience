@@ -54,7 +54,7 @@ spec:
           {{- with .Values.wazuh.manager.filebeat.es_hosts }}
           - name: FILEBEAT_ES_HOSTS
             value: |
-{{ toJson . | indent 16 }}
+{{ toYaml . | toJson | indent 16 }}
           {{- end }}{{/* with es_hosts */}}
           {{- if .Values.wazuh.manager.filebeat.es_username }}
           - name: FILEBEAT_ES_USER
