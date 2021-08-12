@@ -79,7 +79,8 @@ spec:
           {{- else }}
           {{- with .Values.wazuh.worker.filebeat.es_hosts }}
           - name: FILEBEAT_ES_HOSTS
-            value: {{ toJson . }}
+            value: |
+{{ toJson . | indent 16 }}
           {{- end }}{{/* with filebeat.es_hosts */}}
           {{- if .Values.wazuh.worker.filebeat.es_username }}
           - name: FILEBEAT_ES_USER
