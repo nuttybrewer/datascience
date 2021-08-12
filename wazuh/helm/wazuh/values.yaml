@@ -52,6 +52,7 @@ wazuh:
       # </ossec_config
     filebeat:
       enabled: false
+      es_hosts: []
     # config: |
       # output:
       #   elasticsearch:
@@ -96,6 +97,7 @@ wazuh:
 
     filebeat:
       enabled: false
+      es_hosts: []
     # config: |
       # output:
       #   elasticsearch:
