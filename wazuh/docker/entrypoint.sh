@@ -14,92 +14,94 @@ echo "FILEBEAT_ES_HOSTS: ${FILEBEAT_ES_HOSTS}"
 echo "FILEBEAT_ES_SSL_VERIFICATION_MODE: ${FILEBEAT_ES_SSL_VERIFICATION_MODE:-certificate}"
 echo "FILEBEAT_ES_USER: ${FILEBEAT_ES_USER}"
 
-if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
-  # The configuration file isn't valid XML, we need to wrap it in root tags
-  XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
+if [[ ! -e "/var/ossec/etc/initialized" ]]; then
+  if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
+    # The configuration file isn't valid XML, we need to wrap it in root tags
+    XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
 
-  # Edit the configuration file for cluster variables
-  if [[ $WAZUH_CLUSTER_DISABLED == "no" ]]; then
-    echo "Configuring wazuh cluster"
-    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/node_name" -v $(hostname))
-    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/disabled" -v "no")
-    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/key" -v "${WAZUH_CLUSTER_KEY:-changemechangemechangemechangeme}")
-    if [[ $WAZUH_CLUSTER_NODE_TYPE == "manager" ]]; then
-      echo "Configuring node as a manager"
-      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/nodes/node" -v $(hostname))
-      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/node_type" -v "master")
+    # Edit the configuration file for cluster variables
+    if [[ $WAZUH_CLUSTER_DISABLED == "no" ]]; then
+      echo "Configuring wazuh cluster"
+      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/node_name" -v $(hostname))
+      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/disabled" -v "no")
+      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/key" -v "${WAZUH_CLUSTER_KEY:-changemechangemechangemechangeme}")
+      if [[ $WAZUH_CLUSTER_NODE_TYPE == "manager" ]]; then
+        echo "Configuring node as a manager"
+        XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/nodes/node" -v $(hostname))
+        XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/node_type" -v "master")
+      else
+        echo "Configuring node as a worker to connect to ${WAZUH_CLUSTER_MANAGER}"
+        XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/nodes/node" -v "${WAZUH_CLUSTER_MANAGER}")
+        XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/node_type" -v "worker")
+      fi
     else
-      echo "Configuring node as a worker to connect to ${WAZUH_CLUSTER_MANAGER}"
-      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/nodes/node" -v "${WAZUH_CLUSTER_MANAGER}")
-      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/node_type" -v "worker")
+      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/disabled" -v "yes")
     fi
-  else
-    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/disabled" -v "yes")
-  fi
 
-  if [[ $WAZUH_AUTHD_DISABLED == "no" ]]; then
-    echo "Turning on authd"
-    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/auth/disabled" -v "no")
-    if [[ $WAZUH_AUTHD_AGENT_PASSPHRASE_DISABLED == "no" ]];then
-      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/auth/use_password" -v "yes")
+    if [[ $WAZUH_AUTHD_DISABLED == "no" ]]; then
+      echo "Turning on authd"
+      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/auth/disabled" -v "no")
+      if [[ $WAZUH_AUTHD_AGENT_PASSPHRASE_DISABLED == "no" ]];then
+        XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/auth/use_password" -v "yes")
+      fi
+      if [[ $WAZUH_AUTHD_AGENT_CA_DISABLED == "no" ]]; then
+        echo "Turning on ssl_agent_ca check for authd"
+        XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config/auth" -t elem -n "ssl_agent_ca" -v "${WAZUH_AUTHD_AGENT_CA_PATH:-/var/ossec/etc/rootCA.pem}")
+      fi
+    else
+      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/disabled" -v "yes")
     fi
-    if [[ $WAZUH_AUTHD_AGENT_CA_DISABLED == "no" ]]; then
-      echo "Turning on ssl_agent_ca check for authd"
-      XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config/auth" -t elem -n "ssl_agent_ca" -v "${WAZUH_AUTHD_AGENT_CA_PATH:-/var/ossec/etc/rootCA.pem}")
+
+    ###
+    # Insert disabled wodles
+
+    # AWS
+    echo "Configuring Empty AWS Wodle"
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_aws")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_aws" -t attr -n "name" -v "aws-s3")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws" -t elem -n "disabled" -v "yes")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws" -t elem -n "bucket")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws/bucket" -t elem -n "name" -v "mycustombucket.example")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws/bucket" -t elem -n "type" -v "custom")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_aws" -v "wodle")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws" -t elem -n "service")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_aws/service" -t attr -n "type" -v "cloudwatchlogs")
+
+    # Azure
+    echo "Configuring empty Azure-logs Wodle"
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_azure")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_azure" -t attr -n "name" -v "azure-logs")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_azure" -t elem -n "disabled" -v "yes")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_azure" -v "wodle")
+
+    # GCP
+    echo "Configuring empty GCP plugin"
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "gcp-pubsub")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "enabled" -v "no")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "project_id" -v "someprojectid")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "subscription_name" -v "somesubscriptionname")
+    if [[ ! -e "/var/ossec/etc/credentials.json" ]]; then
+      # Create a blank file so module doesn't complain
+      echo "{}" > /var/ossec/etc/credentials.json
     fi
-  else
-    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -u "/root/ossec_config/cluster/disabled" -v "yes")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "credentials_file" -v "/var/ossec/etc/credentials.json")
+
+    # Docker
+    echo "Configuring empty docker-listener wodle"
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_docker")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_docker" -t attr -n "name" -v "docker-listener")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_docker" -t elem -n "disabled" -v "yes")
+    XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_docker" -v "wodle")
+
+    # Insert disabled wodles
+    ###
+
+    echo $XML_CONFIG | xmlstarlet fo -o
+    echo "${XML_CONFIG}" | xmlstarlet fo -o | tail -n +2 | head -n "-1" > /var/ossec/etc/ossec.conf
+    XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
   fi
-
-  ###
-  # Insert disabled wodles
-
-  # AWS
-  echo "Configuring Empty AWS Wodle"
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_aws")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_aws" -t attr -n "name" -v "aws-s3")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws" -t elem -n "disabled" -v "yes")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws" -t elem -n "bucket")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws/bucket" -t elem -n "name" -v "mycustombucket.example")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws/bucket" -t elem -n "type" -v "custom")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_aws" -v "wodle")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_aws" -t elem -n "service")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_aws/service" -t attr -n "type" -v "cloudwatchlogs")
-
-  # Azure
-  echo "Configuring empty Azure-logs Wodle"
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_azure")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_azure" -t attr -n "name" -v "azure-logs")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_azure" -t elem -n "disabled" -v "yes")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_azure" -v "wodle")
-
-  # GCP
-  echo "Configuring empty GCP plugin"
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "gcp-pubsub")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "enabled" -v "no")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "project_id" -v "someprojectid")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "subscription_name" -v "somesubscriptionname")
-  if [[ ! -e "/var/ossec/etc/credentials.json" ]]; then
-    # Create a blank file so module doesn't complain
-    echo "{}" > /var/ossec/etc/credentials.json
-  fi
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/gcp-pubsub" -t elem -n "credentials_file" -v "/var/ossec/etc/credentials.json")
-
-  # Docker
-  echo "Configuring empty docker-listener wodle"
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]" -t elem -n "wodle_docker")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -i "/root/ossec_config[1]/wodle_docker" -t attr -n "name" -v "docker-listener")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -s "/root/ossec_config[1]/wodle_docker" -t elem -n "disabled" -v "yes")
-  XML_CONFIG=$(echo $XML_CONFIG | xmlstarlet ed -O -r "/root/ossec_config[1]/wodle_docker" -v "wodle")
-
-  # Insert disabled wodles
-  ###
-
-  echo $XML_CONFIG | xmlstarlet fo -o
-  echo "${XML_CONFIG}" | xmlstarlet fo -o | tail -n +2 | head -n "-1" > /var/ossec/etc/ossec.conf
-  XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
+  touch /var/ossec/etc/initialized
 fi
-
 service wazuh-manager start
 
 # Create self-sign certs if they do not exist for filebeat
