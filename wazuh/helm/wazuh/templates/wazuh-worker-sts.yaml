@@ -77,9 +77,10 @@ spec:
           - name: FILEBEAT_CONFIG_USE_MOUNTED_VOLUME
             value: yes
           {{- else }}
+          {{- with .Values.wazuh.worker.filebeat.es_hosts }}
           - name: FILEBEAT_ES_HOSTS
-            value: {{ .Values.wazuh.worker.filebeat.es_hosts | toJson }}
-          {{- if .Values.wazuh.worker.filebeat.es_username }}
+            value: {{ toJson . }}
+          {{- end }}{{/* with es_hosts */}}
           - name: FILEBEAT_ES_USER
             value: {{ .Values.wazuh.worker.filebeat.es_username }}
           {{- end }}{{/* filebeat.es_username */}}
