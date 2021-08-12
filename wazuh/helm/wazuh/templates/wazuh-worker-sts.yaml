@@ -80,7 +80,8 @@ spec:
           {{- with .Values.wazuh.worker.filebeat.es_hosts }}
           - name: FILEBEAT_ES_HOSTS
             value: {{ toJson . }}
-          {{- end }}{{/* with es_hosts */}}
+          {{- end }}{{/* with filebeat.es_hosts */}}
+          {{- if .Values.wazuh.worker.filebeat.es_username }}
           - name: FILEBEAT_ES_USER
             value: {{ .Values.wazuh.worker.filebeat.es_username }}
           {{- end }}{{/* filebeat.es_username */}}
@@ -88,8 +89,8 @@ spec:
           - name: FILEBEAT_ES_PASS
             value: {{ .Values.wazuh.worker.filebeat.es_password }}
           {{- end }}{{/* filebeat.es_password */}}
-          {{- end }}{{/* filebeat.enabled */}}
           {{- end }}{{/* filebeat.config */}}
+          {{- end }}{{/* filebeat.enabled */}}
         ports:
           - name: agent-1514-tcp
             containerPort: 1514
