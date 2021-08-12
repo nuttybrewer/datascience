@@ -51,11 +51,8 @@ spec:
           {{- end }}
           {{- end }}
           {{- if and .Values.wazuh.manager.filebeat .Values.wazuh.manager.filebeat.enabled }}
-          {{- with .Values.wazuh.manager.filebeat.es_hosts }}
           - name: FILEBEAT_ES_HOSTS
-            value: |
-{{ toYaml . | toJson | indent 16 }}
-          {{- end }}{{/* with es_hosts */}}
+            value: {{ .Values.wazuh.manager.filebeat.es_hosts | toJson | quote  }}
           {{- if .Values.wazuh.manager.filebeat.es_username }}
           - name: FILEBEAT_ES_USER
             value: {{ .Values.wazuh.manager.filebeat.es_username }}
