@@ -207,11 +207,11 @@ spec:
       {{- end }}{{/* filebeat.enabled*/}}
       {{- end }}{{/* ssl.filebeat.enabled */}}
       {{- if not .Values.wazuh.worker.persistence.enabled }}
-      - name: "data"
+      - name: "ossec-persist"
         emptyDir: {}
       {{- else }}
       {{- if .Values.wazuh.worker.persistence.existingClaim }}
-      - name: "data"
+      - name: "ossec-persist"
         persistentVolumeClaim:
           claimName: {{ .Values.wazuh.worker.persistence.existingClaim }}
       {{- end }}
