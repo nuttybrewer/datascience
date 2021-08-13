@@ -115,6 +115,9 @@ spec:
         resources:
           {{- toYaml .Values.wazuh.worker.resources | nindent 12 }}
         volumeMounts:
+          - mountPath: /var/ossec
+            name: ossec-persist
+            subPath: {{ .Values.wazuh.worker.persistence.subPath }}
           {{- if .Values.wazuh.worker.config }}
           - mountPath: {{ .Values.wazuh.configDirectory }}/etc/ossec.conf
             name: {{ .Release.Name }}-worker-ossec-conf
@@ -158,8 +161,8 @@ spec:
             subPath: {{ .Values.wazuh.ssl.filebeat.existingCertSecretChainSubPath }}
           {{- end }}{{/* ssl.filebeat.enabled */}}
           {{- end }}{{/* filebeat.enabled */}}
-{{- if .Values.wazuh.extraVolumeMounts }}
-{{ toYaml .Values.wazuh.extraVolumeMounts | indent 8 }}
+{{- if .Values.wazuh.worker.extraVolumeMounts }}
+{{ toYaml .Values.wazuh.worker.extraVolumeMounts | indent 8 }}
 {{- end }}
       {{- with .Values.wazuh.worker.nodeSelector }}
       nodeSelector:
