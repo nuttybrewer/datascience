@@ -34,6 +34,8 @@ In order to enable agent auto-enrollment using *X509* certificates, set *wazuh.a
 ### Configuration file override
 Configuration files for all components can be provided inline. In this case, the contents of the config will be mounted as a k8s [secret](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/secret-v1/) and appropriate instructions will be given to the container to load them.
 
+If a configuration file override is provided, the container will ignore all *values.yaml* directives provided to the chart that concern the configuration file.
+
 The values.yaml can be defined as follows:
 ```
 ---
@@ -79,6 +81,8 @@ wazuh:
 ```
 ### Kibana integration
 The provided docker image is a re-write of the [ODFE](https://hub.docker.com/r/amazon/opendistro-for-elasticsearch-kibana) Kibana container that installs plugins provided to the container via the KIBANA_PLUGINS_SPACE_DELIMITED environment variable.
+
+The contents of */usr/share/kibana/data/wazuh/config/wazuh.yml* as defined in the [wazuh documentation](https://documentation.wazuh.com/current/installation-guide/open-distro/distributed-deployment/step-by-step-installation/kibana/index.html#kibana) need to be independently mounted and provided to the [ODFE](https://opendistro.github.io/for-elasticsearch-docs/docs/install/helm/) chart onto */var/run/wazuh.yml*.
 
 The helm charts provided by [ODFE](https://opendistro.github.io/for-elasticsearch-docs/docs/install/helm/) can be overridden to load this image by providing the relevant *kibana.image* and *kibana.imageTag* values to point to a docker repository where the image is hosted.
 
