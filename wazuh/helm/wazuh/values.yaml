@@ -63,7 +63,7 @@ wazuh:
       # ...
       # </ossec_config
     persistence:
-      enabled: true
+      enabled: false
       # existingClaim:
       subPath: ""
       # storageClass: "-"
@@ -141,7 +141,7 @@ wazuh:
     podAnnotations: {}
     podSecurityContext: {}
     persistence:
-      enabled: true
+      enabled: false
       # existingClaim:
       subPath: ""
       # storageClass: "-"
