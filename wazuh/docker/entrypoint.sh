@@ -15,16 +15,18 @@ echo "FILEBEAT_ES_HOSTS: ${FILEBEAT_ES_HOSTS}"
 echo "FILEBEAT_ES_SSL_VERIFICATION_MODE: ${FILEBEAT_ES_SSL_VERIFICATION_MODE:-certificate}"
 echo "FILEBEAT_ES_USER: ${FILEBEAT_ES_USER}"
 
+# If this is the default, there will be no mounts in /var/ossec at all, so symlink it.
+if [[ ! -d "/var/ossec" ]]; then
+  ln -s /opt/ossec /var/ossec
+fi
+
+# If the directory is present but not initialized, initialize it.
+if [[ $WAZUH_PERSIST_OSSEC == "yes" && ! -e "/var/ossec/etc/initialized" ]]; then
+  unlink /var/ossec
+  cp -a  /opt/ossec /var/ossec
+fi
+
 if [[ -d "/var/ossec" && ! -e "/var/ossec/etc/initialized" ]]; then
-  # Wazuh changes config files on the filesystem using it's API once it's booted.
-  # This includes live updates and the entire chroot jail.
-
-  # Unfortunately, we can't install wazuh/ossec and then mount a volume to persist it
-  # under Kubernetes across pod respawns.
-  if [[ $WAZUH_PERSIST_OSSEC == "yes" ]]; then
-    mv /opt/ossec /var/ossec
-  fi
-
   if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
     # The configuration file isn't valid XML, we need to wrap it in root tags
     XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
