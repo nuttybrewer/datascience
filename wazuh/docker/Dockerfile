@@ -1,10 +1,12 @@
 # Steps taken from https://documentation.wazuh.com/current/installation-guide/open-distro/distributed-deployment/step-by-step-installation/wazuh-cluster/wazuh_multi_node_cluster.html#wazuh-multi-node-cluster
 ARG IMAGE_NAME=debian
 ARG IMAGE_TAG=stretch-slim
+FROM ${IMAGE_NAME}:${IMAGE_TAG}
+
 ARG YQ_URL=https://github.com/mikefarah/yq/releases/download/v4.11.2/yq_linux_amd64.tar.gz
 ARG WAZUH_FILEBEAT_MODULE_URL=https://packages.wazuh.com/4.x/filebeat/wazuh-filebeat-0.1.tar.gz
 ARG WAZUH_TEMPLATE_URL=https://raw.githubusercontent.com/wazuh/wazuh/4.1/extensions/elasticsearch/7.x/wazuh-template.json
-FROM ${IMAGE_NAME}:${IMAGE_TAG}
+
 RUN apt update
 RUN apt -y install curl apt-transport-https lsb-release gnupg procps net-tools wget xmlstarlet
 RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add -
