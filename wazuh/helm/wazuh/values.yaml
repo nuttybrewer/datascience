@@ -65,7 +65,6 @@ wazuh:
     persistence:
       enabled: false
       # existingClaim:
-      subPath: ""
       # storageClass: "-"
       accessModes:
         - ReadWriteOnce
@@ -143,7 +142,6 @@ wazuh:
     persistence:
       enabled: false
       # existingClaim:
-      subPath: ""
       # storageClass: "-"
       accessModes:
         - ReadWriteOnce

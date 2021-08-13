@@ -104,6 +104,13 @@ index permissions (wazuh*):
 
 This role should then be assigned to the *internal user* used by filebeat. If **ODFE** is configured to use certificates, then the value of the *CN* or *common_name* attribute should be used, if not, then a pre-configured username/password should be created and passed to the filebeat configuration using *wazuh.filebeat.es_username* and *wazuh.worker.filebeat.es_password* in the *values.yaml* file of the wazuh helm chart.
 
+### Persistence
+By default, the containers *do not persist*. Worker/Manager containers must individually be enabled by setting *wazuh.manager.persistence.enabled* and/or *wazuh.worker.persistence.enabled* to **true**.
+
+Deleting */var/ossec/etc/initialed* will cause the configuration file to re-write itself.
+
+If changes from the Kibana Plugin UI don't need to be maintained across pod deletions, then this option does not need to be enabled.
+
 ## Helm values.yaml overrides
 | Yaml Path | default | Function |
 |:--------- | ------- | -------- |
@@ -115,6 +122,14 @@ This role should then be assigned to the *internal user* used by filebeat. If **
 | wazuh.filebeat.es_hosts | [] | JSON or YAML array with quoted strings with path to ES REST API cluster (port 9200)|
 | wazuh.filebeat.es_username | \<undefined> | Username to connect to ES cluster, may not be required if certificates aren't used |
 | wazuh.filebeat.es_password | \<undefined> | Password to connect to ES cluster, may not be required if certificates aren't used |
+| wazuh.manager.persistence.enabled | false | if *true*, enables persistent volumes for the manager |
+| wazuh.manager.persistence.size | 8Gi | Set the size of the manager's persistent volume |
+| wazuh.manager.persistence.storageClass | \<undefined> | k8s storage class to use, uses the cluster default |
+| wazuh.manager.persistence.existingClaim | \<undefined> | Name of existing persistent volume. Useful if restoring the cluster from backup |
+| wazuh.worker.persistence.enabled | false | if *true*, enables persistent volumes for the workers |
+| wazuh.worker.persistence.size | 8Gi | Set the size of each worker's persistent volume |
+| wazuh.worker.persistence.storageClass | \<undefined> | k8s storage class to use, uses the cluster default |
+| wazuh.worker.persistence.existingClaim | \<undefined> | Name of existing persistent volume. Useful if restoring the cluster from backup |
 
 ### TLS/SSL
 Can be configured for each component by providing key/cert/cachain as an **Opaque** k8s [secret](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/secret-v1/).
@@ -150,7 +165,7 @@ The "data" portion of the secret always contains the PEM-encoded data for each a
   - Provided as a "string" that is just the hostname (needs to quote and convert to JSON array)
   - Provided YAML array of unquoted strings
   - Provided JSON
-- Test persistence of the various containers. Right now containers re-initialize completely each time they're rebooted
+- Test persistence of the various containers under different conditions
 - Add provisions to allow for syslog service. This wasn't done because no encryption is supported at the moment.
 
 

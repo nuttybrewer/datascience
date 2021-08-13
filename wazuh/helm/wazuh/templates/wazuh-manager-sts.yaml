@@ -93,7 +93,7 @@ spec:
           {{- if .Values.wazuh.manager.persistence.enabled }}
           - mountPath: /var/ossec
             name: ossec-persist
-            subPath: {{ .Values.wazuh.manager.persistence.subPath }}
+            subPath: ""
           {{- end }}
           {{- if .Values.wazuh.manager.config }}
           - mountPath: {{ .Values.wazuh.configDirectory }}/etc/ossec.conf
