@@ -52,7 +52,7 @@ index permissions (wazuh*):
   - create_index
 ```
 
-This role should then be assigned to the *internal user* used by filebeat. If **ODFE** is configured to use certificates, then the value of the *CN* or *common_name* attribute should be used, if not, then a pre-configured username/password should be created and passed to the filebeat configuration using *wazuh.manager.filebeat.es_username*/*wazuh.worker.filebeat.es_username* and *wazuh.manager.filebeat.es_password*/*wazuh.worker.filebeat.es_password* in the *values.yaml* file of the wazuh helm chart.
+This role should then be assigned to the *internal user* used by filebeat. If **ODFE** is configured to use certificates, then the value of the *CN* or *common_name* attribute should be used, if not, then a pre-configured username/password should be created and passed to the filebeat configuration using *wazuh.filebeat.es_username* and *wazuh.worker.filebeat.es_password* in the *values.yaml* file of the wazuh helm chart.
 
 ## Helm values.yaml overrides
 | Yaml Path | default | Function |
@@ -62,6 +62,9 @@ This role should then be assigned to the *internal user* used by filebeat. If **
 |wazuh.authd.agentPassphraseEnabled | false | If *true*, causes the workers and agent to use *authd.pass* file for auto-enrollment|
 |wazuh.authd.agentPassphrase | \<undefined> | will mount file containing the provided passphrase into the *worker* and *agent* pods|
 |wazuh.authd.ssl_agent_ca_enabled | false | if *true* will use the certificates provided by the mounted *release_name*-authd-certs.wazuh-authd-root-ca.pem secret to validate agent client certificates|
+| wazuh.filebeat.es_hosts | [] | JSON or YAML array with quotes strings with path to ES REST API cluster (port 9200)|
+| wazuh.filebeat.es_username | \<undefined> | Username to connect to ES cluster, may not be required if certificates aren't used |
+| wazuh.filebeat.es_password | \<undefined> | Password to connect to ES cluster, may not be required if certificates aren't used |
 
 ### TLS/SSL
 Can be configured for each component by providing key/cert/cachain as an **Opaque** k8s [secret](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/secret-v1/).
