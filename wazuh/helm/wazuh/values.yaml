@@ -62,7 +62,18 @@ wazuh:
       # <ossec_config>
       # ...
       # </ossec_config
-    persistence: {}
+    persistence:
+      enabled: true
+      # existingClaim:
+      subPath: ""
+      # storageClass: "-"
+      accessModes:
+        - ReadWriteOnce
+      size: 8Gi
+      annotations: {}
+      # fsGroup: 2000
+    extraVolumeMounts: []
+    extraVolumes: []
     securityContext: {}
       # capabilities:
       #   drop:
@@ -129,7 +140,6 @@ wazuh:
       targetMemoryUtilizationPercentage: 80
     podAnnotations: {}
     podSecurityContext: {}
-
     persistence:
       enabled: true
       # existingClaim:
@@ -140,6 +150,8 @@ wazuh:
       size: 8Gi
       annotations: {}
       # fsGroup: 2000
+    extraVolumeMounts: []
+    extraVolumes: []
     nodeSelector: {}
     tolerations: []
     affinity: {}
