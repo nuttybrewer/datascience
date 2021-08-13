@@ -19,7 +19,7 @@ RUN python3 -m pip install docker
 RUN apt -y purge python3-pip && apt -y autoremove
 # We get into weird situations with volume persistence, so we'll move the entire OSSEC install to /opt/ossec
 # and from there "link it" in place.
-RUN mv /var/ossec /opt/ossec
+RUN cp -a /var/ossec /opt/ossec
 ADD filebeat.yml /etc/filebeat/filebeat.yml
 RUN curl -so /etc/filebeat/wazuh-template.json ${WAZUH_TEMPLATE_URL}
 RUN chmod go+r /etc/filebeat/wazuh-template.json
