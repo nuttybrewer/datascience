@@ -31,6 +31,52 @@ In order to enable agent auto-enrollment using a passphrase, set *wazuh.authd.ag
 
 In order to enable agent auto-enrollment using *X509* certificates, set *wazuh.authd.ssl_agent_ca_enabled* to *true*. This will automatically use the mounted TLS [secret](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/secret-v1/) cited [below](#TLS/SSL). Any agent presenting a certificate signed by the provided *rootCA.crt* will be accepted.
 
+### Configuration file override
+Configuration files for all components can be provided inline. In this case, the contents of the config will be mounted as a k8s [secret](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/secret-v1/) and appropriate instructions will be given to the container to load them.
+
+The values.yaml can be defined as follows:
+```
+---
+wazuh:
+  manager:
+    config: |
+      <ossec_config>
+        ...
+      </ossec_config>
+  worker:
+    config: |
+      <ossec_config>
+        ...
+      </ossec_config>
+  filebeat:
+    config: |
+      output:
+        elasticsearch:
+          hosts: ["odferest.internal:9200"]'
+          protocol: https
+          ssl:
+            certificate_authorities:
+              - /etc/filebeat/certs/root-ca.pem
+            certificate: "/etc/filebeat/certs/filebeat.pem"
+            key: "/etc/filebeat/certs/filebeat-key.pem"
+            verification_mode: none
+        setup:
+        template:
+          json:
+            enabled: true
+            path: '/etc/filebeat/wazuh-template.json'
+            name: 'wazuh'
+        ilm:
+          overwrite: true
+          enabled: false
+        filebeat:
+        modules:
+          - module: wazuh
+            alerts:
+              enabled: true
+            archives:
+              enabled: false     
+```
 ### Kibana integration
 The provided docker image is a re-write of the [ODFE](https://hub.docker.com/r/amazon/opendistro-for-elasticsearch-kibana) Kibana container that installs plugins provided to the container via the KIBANA_PLUGINS_SPACE_DELIMITED environment variable.
 
