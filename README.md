@@ -32,7 +32,9 @@ In order to enable agent auto-enrollment using a passphrase, set *wazuh.authd.ag
 In order to enable agent auto-enrollment using *X509* certificates, set *wazuh.authd.ssl_agent_ca_enabled* to *true*. This will automatically use the mounted TLS [secret](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/secret-v1/) cited [below](#TLS/SSL). Any agent presenting a certificate signed by the provided *rootCA.crt* will be accepted.
 
 ### Configuration file override
-Configuration files for all components can be provided inline. In this case, the contents of the config will be mounted as a k8s [secret](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/secret-v1/) and appropriate instructions will be given to the container to load them.
+To enable "advanced" configurations for the cluster, configuration files for all components can be provided inline. This should not be required to get most clusters up and running and the default container environment variables coupled with the helm charts set sane defaults. It is suggested to **ignore this section** and use it as a last resort.
+
+If this is desired, the contents of the config will be mounted as a k8s [secret](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/secret-v1/) and appropriate instructions will be given to the container to load them.
 
 If a configuration file override is provided, the container will ignore all *values.yaml* directives provided to the chart that concern the configuration file.
 
@@ -107,7 +109,7 @@ This role should then be assigned to the *internal user* used by filebeat. If **
 ### Persistence
 By default, the containers *do not persist*. Worker/Manager containers must individually be enabled by setting *wazuh.manager.persistence.enabled* and/or *wazuh.worker.persistence.enabled* to **true**.
 
-Deleting */var/ossec/etc/initialed* will cause the configuration file to re-write itself.
+Deleting */var/ossec/etc/initialized* will cause the configuration file to re-write itself.
 
 If changes from the Kibana Plugin UI don't need to be maintained across pod deletions, then this option does not need to be enabled.
 
@@ -125,11 +127,11 @@ If changes from the Kibana Plugin UI don't need to be maintained across pod dele
 | wazuh.manager.persistence.enabled | false | if *true*, enables persistent volumes for the manager |
 | wazuh.manager.persistence.size | 8Gi | Set the size of the manager's persistent volume |
 | wazuh.manager.persistence.storageClass | \<undefined> | k8s storage class to use, uses the cluster default |
-| wazuh.manager.persistence.existingClaim | \<undefined> | Name of existing persistent volume. Useful if restoring the cluster from backup |
+| wazuh.manager.persistence.existingClaim | \<undefined> | Name of existing persistent volume. Useful if restoring the cluster from backup or moving helm releases with different names|
 | wazuh.worker.persistence.enabled | false | if *true*, enables persistent volumes for the workers |
 | wazuh.worker.persistence.size | 8Gi | Set the size of each worker's persistent volume |
 | wazuh.worker.persistence.storageClass | \<undefined> | k8s storage class to use, uses the cluster default |
-| wazuh.worker.persistence.existingClaim | \<undefined> | Name of existing persistent volume. Useful if restoring the cluster from backup |
+| wazuh.worker.persistence.existingClaim | \<undefined> | Name of existing persistent volume. Useful if restoring the cluster from backup moving helm releases with different names |
 
 ### TLS/SSL
 Can be configured for each component by providing key/cert/cachain as an **Opaque** k8s [secret](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/secret-v1/).
