@@ -79,7 +79,7 @@ spec:
           {{- else }}
           - name: FILEBEAT_ES_HOSTS
             value: |
-              {{ .Values.wazuh.worker.filebeat.es_hosts }}
+              {{ .Values.wazuh.worker.filebeat.es_hosts | toJson | squote }}
           {{- if .Values.wazuh.worker.filebeat.es_username }}
           - name: FILEBEAT_ES_USER
             value: {{ .Values.wazuh.worker.filebeat.es_username }}
