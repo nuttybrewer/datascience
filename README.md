@@ -169,6 +169,7 @@ The "data" portion of the secret always contains the PEM-encoded data for each a
   - Provided JSON
 - Test persistence of the various containers under different conditions
 - Add provisions to allow for syslog service. This wasn't done because no encryption is supported at the moment.
+- Right now worker/manager start in random order and may cause workers to enter a prolonged unstable state. Fix would be to change the container to probe for the master and fail if it's not available, thus triggering the worker container to be restarted and try again.
 
 
 # Resource materials
