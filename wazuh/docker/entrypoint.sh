@@ -15,6 +15,18 @@ echo "FILEBEAT_ES_HOSTS: ${FILEBEAT_ES_HOSTS}"
 echo "FILEBEAT_ES_SSL_VERIFICATION_MODE: ${FILEBEAT_ES_SSL_VERIFICATION_MODE:-certificate}"
 echo "FILEBEAT_ES_USER: ${FILEBEAT_ES_USER}"
 
+if [[ -d "/var/ossec" ]]; then
+  echo "/var/ossec matches -d"
+fi
+
+if [[ -L "/var/ossec" ]]; then
+  echo "/var/ossec matches -L"
+fi
+
+if [[ -e "/var/ossec/etc/initialized" ]]; then
+  echo "/var/ossec/etc/initialized is present"
+fi
+
 # If the directory is present but not initialized, initialize it.
 if [[ $WAZUH_PERSIST_OSSEC == "yes" && ! -e "/var/ossec/etc/initialized" ]]; then
   echo "/var/ossec/etc/initialized not detected, copying over /opt/ossec to /var/ossec"
