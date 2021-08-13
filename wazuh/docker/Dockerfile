@@ -3,6 +3,7 @@ ARG IMAGE_NAME=debian
 ARG IMAGE_TAG=stretch-slim
 ARG YQ_VER=v4.11.2
 ARG WAZUH_FILEBEAT_MODULE_URL=https://packages.wazuh.com/4.x/filebeat/wazuh-filebeat-0.1.tar.gz
+ARG WAZUH_TEMPLATE_URL=https://raw.githubusercontent.com/wazuh/wazuh/4.1/extensions/elasticsearch/7.x/wazuh-template.json
 FROM ${IMAGE_NAME}:${IMAGE_TAG}
 RUN apt update
 RUN apt -y install curl apt-transport-https lsb-release gnupg procps net-tools wget xmlstarlet
@@ -20,7 +21,7 @@ RUN apt -y purge python3-pip && apt -y autoremove
 # and from there "link it" in place.
 RUN mv /var/ossec /opt/ossec
 ADD filebeat.yml /etc/filebeat/filebeat.yml
-RUN curl -so /etc/filebeat/wazuh-template.json https://raw.githubusercontent.com/wazuh/wazuh/4.1/extensions/elasticsearch/7.x/wazuh-template.json
+RUN curl -so /etc/filebeat/wazuh-template.json ${WAZUH_TEMPLATE_URL}
 RUN chmod go+r /etc/filebeat/wazuh-template.json
 RUN curl -s ${WAZUH_FILEBEAT_MODULE_URL} | tar -xvz -C /usr/share/filebeat/module
 RUN update-rc.d wazuh-manager defaults 95 10
