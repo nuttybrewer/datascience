@@ -39,6 +39,10 @@ spec:
         image: {{ .Values.wazuh.worker.imageRegistry }}/{{ .Values.wazuh.worker.image }}:{{ .Values.wazuh.worker.imageTag }}
         imagePullPolicy: {{ .Values.wazuh.worker.imagePullPolicy | default "Always" | quote }}
         env:
+          {{- if .Values.wazuh.worker.persistence.enabled }}
+          - name: WAZUH_PERSIST_OSSEC
+            value: "yes"
+          {{- end }}
           {{- if .Values.wazuh.worker.config }}
           - name: WAZUH_CONFIG_USE_MOUNTED_VOLUME
             value: "yes"
@@ -115,9 +119,11 @@ spec:
         resources:
           {{- toYaml .Values.wazuh.worker.resources | nindent 12 }}
         volumeMounts:
+          {{- if .Values.wazuh.worker.persistence.enabled }}
           - mountPath: /var/ossec
             name: ossec-persist
             subPath: {{ .Values.wazuh.worker.persistence.subPath }}
+          {{- end }}
           {{- if .Values.wazuh.worker.config }}
           - mountPath: {{ .Values.wazuh.configDirectory }}/etc/ossec.conf
             name: {{ .Release.Name }}-worker-ossec-conf
@@ -206,10 +212,7 @@ spec:
           secretName: {{ .Values.wazuh.ssl.filebeat.existingCertSecret }}
       {{- end }}{{/* filebeat.enabled*/}}
       {{- end }}{{/* ssl.filebeat.enabled */}}
-      {{- if not .Values.wazuh.worker.persistence.enabled }}
-      - name: "ossec-persist"
-        emptyDir: {}
-      {{- else }}
+      {{- if .Values.wazuh.worker.persistence.enabled }}
       {{- if .Values.wazuh.worker.persistence.existingClaim }}
       - name: "ossec-persist"
         persistentVolumeClaim:

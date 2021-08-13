@@ -15,18 +15,14 @@ echo "FILEBEAT_ES_HOSTS: ${FILEBEAT_ES_HOSTS}"
 echo "FILEBEAT_ES_SSL_VERIFICATION_MODE: ${FILEBEAT_ES_SSL_VERIFICATION_MODE:-certificate}"
 echo "FILEBEAT_ES_USER: ${FILEBEAT_ES_USER}"
 
-# If this is the default, there will be no mounts in /var/ossec at all, so symlink it.
-if [[ ! -d "/var/ossec" ]]; then
-  ln -s /opt/ossec /var/ossec
-fi
-
 # If the directory is present but not initialized, initialize it.
 if [[ $WAZUH_PERSIST_OSSEC == "yes" && ! -e "/var/ossec/etc/initialized" ]]; then
-  unlink /var/ossec
+  echo "/var/ossec/etc/initialized not detected, copying over /opt/ossec to /var/ossec"
+  rm /var/ossec
   cp -a  /opt/ossec /var/ossec
 fi
 
-if [[ -d "/var/ossec" && ! -e "/var/ossec/etc/initialized" ]]; then
+if [[ ! -e "/var/ossec/etc/initialized" ]]; then
   if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
     # The configuration file isn't valid XML, we need to wrap it in root tags
     XML_CONFIG=$(echo "<root>$(cat /var/ossec/etc/ossec.conf)</root>")
