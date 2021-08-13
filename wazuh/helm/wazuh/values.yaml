@@ -145,24 +145,24 @@ wazuh:
     api:
       enabled: false
       # existingCertSecret: mywazuh-api-certs
-      # existingCertSecretKeySubPath: wazuh-api-key.pem
-      # existingCertSecretCertSubPath: wazuh-api-cert.pem
-      # existingCertSecretChainSubPath: wazuh-api-root-ca.pem
+      existingCertSecretKeySubPath: wazuh-api-key.pem
+      existingCertSecretCertSubPath: wazuh-api-cert.pem
+      existingCertSecretChainSubPath: wazuh-api-root-ca.pem
     filebeat:
       enabled: false
       # existingCertSecret: mywazuh-filebeat-certs
-      # existingCertSecretKeySubPath: filebeat-key.pem
-      # existingCertSecretCertSubPath: filebeat-cert.pem
-      # existingCertSecretChainSubPath: filebeat-root-ca.pem
+      existingCertSecretKeySubPath: filebeat-key.pem
+      existingCertSecretCertSubPath: filebeat-cert.pem
+      existingCertSecretChainSubPath: filebeat-root-ca.pem
     authd:
       enabled: false
       # existingCertSecret: mywazuh-authd-certs
-      # existingCertSecretKeySubPath: wazuh-authd-key.pem
-      # existingCertSecretCertSubPath: wazuh-authd-cert.pem
-      # existingCertSecretChainSubPath: wazuh-authd-root-ca.pem
+      existingCertSecretKeySubPath: wazuh-authd-key.pem
+      existingCertSecretCertSubPath: wazuh-authd-cert.pem
+      existingCertSecretChainSubPath: wazuh-authd-root-ca.pem
     agent:
       enabled: false
       # existingCertSecret: mywazuh-agent-certs
-      # existingCertSecretKeySubPath: wazuh-agent-key.pem
-      # existingCertSecretCertSubPath: wazuh-agent-cert.pem
-      # existingCertSecretChainSubPath: wazuh-agent-root-ca.pem
+      existingCertSecretKeySubPath: wazuh-agent-key.pem
+      existingCertSecretCertSubPath: wazuh-agent-cert.pem
+      existingCertSecretChainSubPath: wazuh-agent-root-ca.pem
