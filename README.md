@@ -112,7 +112,7 @@ This role should then be assigned to the *internal user* used by filebeat. If **
 |wazuh.authd.agentPassphraseEnabled | false | If *true*, causes the workers and agent to use *authd.pass* file for auto-enrollment|
 |wazuh.authd.agentPassphrase | \<undefined> | will mount file containing the provided passphrase into the *worker* and *agent* pods|
 |wazuh.authd.ssl_agent_ca_enabled | false | if *true* will use the certificates provided by the mounted *release_name*-authd-certs.wazuh-authd-root-ca.pem secret to validate agent client certificates|
-| wazuh.filebeat.es_hosts | [] | JSON or YAML array with quotes strings with path to ES REST API cluster (port 9200)|
+| wazuh.filebeat.es_hosts | [] | JSON or YAML array with quoted strings with path to ES REST API cluster (port 9200)|
 | wazuh.filebeat.es_username | \<undefined> | Username to connect to ES cluster, may not be required if certificates aren't used |
 | wazuh.filebeat.es_password | \<undefined> | Password to connect to ES cluster, may not be required if certificates aren't used |
 
