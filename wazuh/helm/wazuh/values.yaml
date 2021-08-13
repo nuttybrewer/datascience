@@ -18,9 +18,9 @@ wazuh:
     # key: changemechangemechangemechangeme
   authd:
     enabled: true
-    # sslAgentCaEnabled: true
-    agentPassphraseEnabled: true
-    agentPassphrase: changemechangemechangemechangeme
+    sslAgentCaEnabled: false
+    agentPassphraseEnabled: false
+    # agentPassphrase: changemechangemechangemechangeme
   agent:
     enabled: false
     syslogEnabled: false
