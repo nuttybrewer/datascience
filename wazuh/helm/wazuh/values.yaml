@@ -16,6 +16,18 @@ wazuh:
     enabled: true
     # name: wazuh
     # key: changemechangemechangemechangeme
+  filebeat:
+    enabled: true
+    es_hosts: []
+    # es_username:
+    # es_password:
+  # config: |
+    # output:
+    #   elasticsearch:
+    #     hosts: []
+    #     protocol: https
+    #     username: "admin"
+    #     password: "admin"
   authd:
     enabled: true
     sslAgentCaEnabled: false
@@ -50,16 +62,6 @@ wazuh:
       # <ossec_config>
       # ...
       # </ossec_config
-    filebeat:
-      enabled: false
-      es_hosts: []
-    # config: |
-      # output:
-      #   elasticsearch:
-      #     hosts: []
-      #     protocol: https
-      #     username: "admin"
-      #     password: "admin"
     persistence: {}
     securityContext: {}
       # capabilities:
@@ -79,6 +81,7 @@ wazuh:
       # requests:
       #   cpu: 100m
       #   memory: 128Mi
+    serviceAnnotations: {}      
     podAnnotations: {}
     podSecurityContext: {}
       # fsGroup: 2000
@@ -94,18 +97,7 @@ wazuh:
       # <ossec_config>
       # ...
       # </ossec_config
-
-    filebeat:
-      enabled: false
-      es_hosts: []
-    # config: |
-      # output:
-      #   elasticsearch:
-      #     hosts: []
-      #     protocol: https
-      #     username: "admin"
-      #     password: "admin"
-    # serviceAnnotations: {}
+    serviceAnnotations: {}
     #   service.beta.kubernetes.io/aws-load-balancer-type: external
     #   service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
     #   service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing

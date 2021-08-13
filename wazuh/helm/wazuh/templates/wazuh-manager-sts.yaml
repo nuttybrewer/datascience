@@ -50,17 +50,17 @@ spec:
             value: {{ .Values.wazuh.cluster.key | quote }}
           {{- end }}
           {{- end }}
-          {{- if and .Values.wazuh.manager.filebeat .Values.wazuh.manager.filebeat.enabled }}
+          {{- if and .Values.wazuh.filebeat .Values.wazuh.filebeat.enabled }}
           - name: FILEBEAT_ES_HOSTS
             value: |
-              {{ .Values.wazuh.manager.filebeat.es_hosts | toJson }}
-          {{- if .Values.wazuh.manager.filebeat.es_username }}
+              {{ .Values.wazuh.filebeat.es_hosts | toJson }}
+          {{- if .Values.wazuh.filebeat.es_username }}
           - name: FILEBEAT_ES_USER
-            value: {{ .Values.wazuh.manager.filebeat.es_username }}
+            value: {{ .Values.wazuh.filebeat.es_username }}
           {{- end }}
-          {{- if .Values.wazuh.manager.filebeat.es_password }}
+          {{- if .Values.wazuh.filebeat.es_password }}
           - name: FILEBEAT_ES_PASS
-            value: {{ .Values.wazuh.manager.filebeat.es_password }}
+            value: {{ .Values.wazuh.filebeat.es_password }}
           {{- end }}
           {{- end }}
         ports:
@@ -99,8 +99,8 @@ spec:
             name: {{ .Release.Name }}-api-certs
             subPath: {{ .Values.wazuh.ssl.api.existingCertSecretKeySubPath }}
           {{- end }}
-          {{- if .Values.wazuh.manager.filebeat.enabled }}
-          {{- if .Values.wazuh.manager.filebeat.config }}
+          {{- if .Values.wazuh.filebeat.enabled }}
+          {{- if .Values.wazuh.filebeat.config }}
           - mountPath: /etc/filebeat/filebeat.yml
             name: {{ .Release.Name }}-manager-filebeat-conf
             subPath: filebeat.yml
@@ -126,8 +126,8 @@ spec:
         secret:
           secretName: {{ .Release.Name }}-manger-ossec-conf
       {{- end }}
-      {{- if .Values.wazuh.manager.filebeat.enabled }}
-      {{- if .Values.wazuh.manager.filebeat.config }}
+      {{- if .Values.wazuh.filebeat.enabled }}
+      {{- if .Values.wazuh.filebeat.config }}
       - name: {{ .Release.Name }}-manager-filebeat-conf
         secret:
           secretName: {{ .Release.Name }}-manager-filebeat-conf
@@ -138,7 +138,7 @@ spec:
         secret:
           secretName: {{ .Values.wazuh.ssl.api.existingCertSecret }}
       {{- end }}
-      {{- if .Values.wazuh.manager.filebeat.enabled }}
+      {{- if .Values.wazuh.filebeat.enabled }}
       {{- if .Values.wazuh.ssl.filebeat.enabled }}
       - name: {{ .Release.Name }}-filebeat-certs
         secret:
