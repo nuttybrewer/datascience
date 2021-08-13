@@ -222,7 +222,7 @@ spec:
   {{- if and .Values.wazuh.worker.persistence.enabled (not .Values.wazuh.manager.persistence.existingClaim) }}
   volumeClaimTemplates:
   - metadata:
-      name: data
+      name: ossec-persist
       annotations:
       {{- range $key, $value := .Values.wazuh.worker.persistence.annotations }}
         {{ $key }}: {{ $value }}
