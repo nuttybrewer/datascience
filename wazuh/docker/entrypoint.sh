@@ -1,6 +1,7 @@
 #!/bin/bash
 echo "Provided environment variables"
 echo "WAZUH_PERSIST_OSSEC: ${WAZUH_PERSIST_OSSEC:-no}"
+echo "WAZUH_CLUSTERD_CHECK_DELAY_TIME:${WAZUH_CLUSTERD_CHECK_DELAY_TIME:-10}"
 echo "WAZUH_CONFIG_USE_MOUNTED_VOLUME: ${WAZUH_CONFIG_USE_MOUNTED_VOLUME:-no}"
 echo "WAZUH_CLUSTER_DISABLED: ${WAZUH_CLUSTER_DISABLED:-yes}"
 echo "WAZUH_CLUSTER_NAME: ${WAZUH_CLUSTER_NAME:-wazuh}"
@@ -158,9 +159,8 @@ fi
 service filebeat start
 
 # Check that wazuh manager started properly
-WAIT=10
 echo "Checking that ossec-clusterd is running..."
-sleep $WAIT
+sleep "${WAZUH_CLUSTERD_CHECK_DELAY_TIME:-10}"
 /var/ossec/bin/cluster_control -l
 
 
