@@ -226,6 +226,9 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: ossec-persist
+      labels:
+        role: worker
+{{ include "wazuh.labels" . | indent 8 }}
       annotations:
       {{- range $key, $value := .Values.wazuh.worker.persistence.annotations }}
         {{ $key }}: {{ $value }}
