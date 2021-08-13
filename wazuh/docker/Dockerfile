@@ -9,7 +9,7 @@ RUN apt update
 RUN apt -y install curl apt-transport-https lsb-release gnupg procps net-tools wget xmlstarlet
 RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add -
 RUN echo "deb https://packages.wazuh.com/4.x/apt/ stable main" | tee -a /etc/apt/sources.list.d/wazuh.list
-RUN wget https://github.com/mikefarah/yq/releases/download/${YQ_VER}/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
+RUN wget https://github.com/mikefarah/yq/releases/download/$YQ_VER/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
 RUN apt update
 RUN apt -y install wazuh-manager filebeat python3-pip
 RUN python3 -m pip install boto3
@@ -21,9 +21,9 @@ RUN apt -y purge python3-pip && apt -y autoremove
 # and from there "link it" in place.
 RUN cp -a /var/ossec /opt/ossec
 ADD filebeat.yml /etc/filebeat/filebeat.yml
-RUN curl -so /etc/filebeat/wazuh-template.json ${WAZUH_TEMPLATE_URL}
+RUN curl -so /etc/filebeat/wazuh-template.json $WAZUH_TEMPLATE_URL
 RUN chmod go+r /etc/filebeat/wazuh-template.json
-RUN curl -s ${WAZUH_FILEBEAT_MODULE_URL} | tar -xvz -C /usr/share/filebeat/module
+RUN curl -s $WAZUH_FILEBEAT_MODULE_URL | tar -xvz -C /usr/share/filebeat/module
 RUN update-rc.d wazuh-manager defaults 95 10
 RUN update-rc.d filebeat defaults 95 10
 ADD entrypoint.sh /docker-entrypoint.sh
