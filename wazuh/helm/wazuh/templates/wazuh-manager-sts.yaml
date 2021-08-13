@@ -36,6 +36,10 @@ spec:
         image: {{ .Values.wazuh.manager.imageRegistry }}/{{ .Values.wazuh.manager.image }}:{{ .Values.wazuh.manager.imageTag }}
         imagePullPolicy: {{ .Values.wazuh.manager.imagePullPolicy | default "Always" | quote }}
         env:
+          {{- if .Values.wazuh.manager.persistence.enabled }}
+          - name: WAZUH_PERSIST_OSSEC
+            value: "yes"
+          {{- end }}
           - name: WAZUH_CLUSTER_NODE_TYPE
             value: "manager"
           {{- if .Values.wazuh.cluster.enabled }}
@@ -86,6 +90,11 @@ spec:
             port: api-https
 
         volumeMounts:
+          {{- if .Values.wazuh.manager.persistence.enabled }}
+          - mountPath: /var/ossec
+            name: ossec-persist
+            subPath: {{ .Values.wazuh.manager.persistence.subPath }}
+          {{- end }}
           {{- if .Values.wazuh.manager.config }}
           - mountPath: {{ .Values.wazuh.configDirectory }}/etc/ossec.conf
             name: {{ .Release.Name }}-manager-ossec-conf
@@ -145,6 +154,40 @@ spec:
           secretName: {{ .Values.wazuh.ssl.filebeat.existingCertSecret }}
       {{- end }}
       {{- end }}
+      {{- if .Values.wazuh.manager.persistence.enabled }}
+      {{- if .Values.wazuh.manager.persistence.existingClaim }}
+      - name: "ossec-persist"
+        persistentVolumeClaim:
+          claimName: {{ .Values.wazuh.manager.persistence.existingClaim }}
+      {{- end }}
+      {{- end }}
 {{- if .Values.wazuh.manager.extraVolumes }}
 {{ toYaml .Values.wazuh.manager.extraVolumes | indent 6 }}
+{{- end }}
+  {{- if and .Values.wazuh.manager.persistence.enabled (not .Values.wazuh.manager.persistence.existingClaim) }}
+  volumeClaimTemplates:
+  - metadata:
+      name: ossec-persist
+      labels:
+        role: manager
+{{ include "wazuh.labels" . | indent 8 }}
+      annotations:
+      {{- range $key, $value := .Values.wazuh.manager.persistence.annotations }}
+        {{ $key }}: {{ $value }}
+      {{- end }}
+    spec:
+      accessModes:
+      {{- range .Values.wazuh.manager.persistence.accessModes }}
+        - {{ . | quote }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.wazuh.manager.persistence.size | quote }}
+    {{- if .Values.wazuh.manager.persistence.storageClass }}
+    {{- if (eq "-" .Values.wazuh.manager.persistence.storageClass) }}
+      storageClassName: ""
+    {{- else }}
+      storageClassName: "{{ .Values.wazuh.manager.persistence.storageClass }}"
+    {{- end }}
+    {{- end }}
 {{- end }}

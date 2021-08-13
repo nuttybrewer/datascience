@@ -222,7 +222,7 @@ spec:
 {{- if .Values.wazuh.worker.extraVolumes }}
 {{ toYaml .Values.wazuh.worker.extraVolumes | indent 6 }}
 {{- end }}
-  {{- if and .Values.wazuh.worker.persistence.enabled (not .Values.wazuh.manager.persistence.existingClaim) }}
+  {{- if and .Values.wazuh.worker.persistence.enabled (not .Values.wazuh.worker.persistence.existingClaim) }}
   volumeClaimTemplates:
   - metadata:
       name: ossec-persist

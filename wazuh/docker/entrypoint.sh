@@ -25,6 +25,7 @@ fi
 if [[ ! -e "/var/ossec/etc/initialized" ]]; then
   # If the directory is present but not initialized, initialize it.
   if [[ ! -L "/var/ossec" && $WAZUH_PERSIST_OSSEC == "yes" ]]; then
+    echo "Persistent system not initialized"
     echo "Copying over /opt/ossec to /var/ossec"
     cp -a  /opt/ossec/* /var/ossec
   fi
