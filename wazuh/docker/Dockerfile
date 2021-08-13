@@ -14,6 +14,9 @@ RUN python3 -m pip install google-cloud-pubsub
 RUN python3 -m pip install docker
 # PIP installs build-essentials which we don't want bloating the image
 RUN apt -y purge python3-pip && apt -y autoremove
+# We get into weird situations with volume persistence, so we'll move the entire OSSEC install to /opt/ossec
+# and from there "link it" in place.
+RUN mv /var/ossec /opt/ossec && ln -s /opt/ossec /var/ossec 
 ADD filebeat.yml /etc/filebeat/filebeat.yml
 RUN curl -so /etc/filebeat/wazuh-template.json https://raw.githubusercontent.com/wazuh/wazuh/4.1/extensions/elasticsearch/7.x/wazuh-template.json
 RUN chmod go+r /etc/filebeat/wazuh-template.json
