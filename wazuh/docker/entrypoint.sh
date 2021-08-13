@@ -29,9 +29,9 @@ if [[ -e "/var/ossec/etc/initialized" ]]; then
 fi
 
 # If the directory is present but not initialized, initialize it.
-if [[ $WAZUH_PERSIST_OSSEC == "yes" && ! -e "/var/ossec/etc/initialized" ]]; then
+if [[ ! -h "/var/ossec" && $WAZUH_PERSIST_OSSEC == "yes" && ! -e "/var/ossec/etc/initialized" ]]; then
   echo "/var/ossec/etc/initialized not detected, copying over /opt/ossec to /var/ossec"
-  rm /var/ossec
+  # rm /var/ossec
   cp -a  /opt/ossec /var/ossec
 fi
 
