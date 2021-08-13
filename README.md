@@ -5,7 +5,7 @@ Various DevOps build definitions used for other data management projects.
 Reference the [Wazuh Architecture](https://documentation.wazuh.com/current/getting-started/architecture.html) page for more details.
 
 ## Architecture
-The helm chart launches the docker containers as depicted in this [diagram](https://documentation.wazuh.com/current/_images/deployment1.png) provided by the Wazuh project:
+The helm chart launches pods as depicted in this [diagram](https://documentation.wazuh.com/current/_images/deployment1.png) provided by the Wazuh project:
 ![Wazuh Architecture Image](https://documentation.wazuh.com/current/_images/deployment1.png)
 
 \*The *master* pod has been renamed to **manager** for the sake of this project.
@@ -15,21 +15,46 @@ The helm chart does not install the Kibana/ElasticSearch environment.
 
 The *manager* pod does not accept Agent Endpoint connections (AuthD or Secure) and has for sole purpose to host the Wazuh API (TCP 55000) and the cluster management port (TCP1516).
 
-The *Worker* pod(s) are responsible for Agent Endpoint connections (AuthD or Secure).
+The *Worker* pod(s) are responsible for Agent Endpoint connections (AuthD \[TCP1515] or Secure \[TCP1514]).
 
-An optional *Agent* pod is available in case dedicated *Wodles* or pull-type actions (like GCP) would need to be performed by the cluster to acquire logs, although these may optionally be configured on the *manager* as well.
+An optional *Agent* pod is available in case dedicated *Wodles* or pull-type actions (like GCP) would need to be performed by the cluster to acquire logs, although these may optionally be configured on the *manager* as well in most cases so the agent pod is **disabled** by default.
+
+Note, no *syslog* mechanism has been exposed for the moment and would need to be implemented by an external agent.
 
 ## Installation
 Launching the chart with no arguments creates a wazuh cluster with a manager pod and two worker pods and exposes the authd and secure agent communications port under a k8s service using TCP only.
 
 ### Agent Enrollment and authentication
-Note, in the default scenario, the agent enrollment must be keyed manually.
+In the default scenario, the agent enrollment must be keyed manually.
 
-In order to enable agent auto-enrollment using a passphrase, set *wazuh.authd.agentPassphraseEnabled* to *true*. In this scenario, if *wazuh.authd.agentPassphrase* is specified, the chart will mount a k8s [secret](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/secret-v1/) that will inject the passphrase into the *worker* and *agent* pods. If *wazuh.authd.agentPasshphrase* is not provided, then the workers will use a random key and one must log into one of the *worker* pods in order to retrieve the value from */var/ossec/etc/authd.pass*.
+In order to enable agent auto-enrollment using a passphrase, set *wazuh.authd.agentPassphraseEnabled* to *true*. If *wazuh.authd.agentPassphrase* is specified, the chart will mount a k8s [secret](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/secret-v1/) that will inject the passphrase into the *worker* and *agent* pods. If *wazuh.authd.agentPasshphrase* is not provided, then the workers will use a random key and one must log into one of the *worker* pods in order to retrieve the value from */var/ossec/etc/authd.pass*.
 
 In order to enable agent auto-enrollment using *X509* certificates, set *wazuh.authd.ssl_agent_ca_enabled* to *true*. This will automatically use the mounted TLS [secret](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/secret-v1/) cited [below](#TLS/SSL). Any agent presenting a certificate signed by the provided *rootCA.crt* will be accepted.
 
-### Helm values.yaml overrides
+### Kibana integration
+The provided docker image is a re-write of the [ODFE](https://hub.docker.com/r/amazon/opendistro-for-elasticsearch-kibana) Kibana container that installs plugins provided to the container via the KIBANA_PLUGINS_SPACE_DELIMITED environment variable.
+
+The helm charts provided by [ODFE](https://opendistro.github.io/for-elasticsearch-docs/docs/install/helm/) can be overridden to load this image by providing the relevant *kibana.image* and *kibana.imageTag* values to point to a docker repository where the image is hosted.
+
+A *wazuh user* must then be defined in order for **Filebeat** to be able to connect to the ElasticSearch cluster and create the *wazuh_* indexes.
+
+In the kibana->Open Distro for ElasticSearch->Security panel, create a role with the following permissions:
+```
+cluster permissions:
+  - cluster_monitor
+  - cluster_composite_ops
+  - indices:admin/template/get
+  - indices:admin/template/put
+  - cluster:admin/ingest/pipeline/get
+  - cluster:admin/ingest/pipeline/put
+index permissions (wazuh*):
+  - crud
+  - create_index
+```
+
+This role should then be assigned to the *internal user* used by filebeat. If **ODFE** is configured to use certificates, then the value of the *CN* or *common_name* attribute should be used, if not, then a pre-configured username/password should be created and passed to the filebeat configuration using *wazuh.manager.filebeat.es_username*/*wazuh.worker.filebeat.es_username* and *wazuh.manager.filebeat.es_password*/*wazuh.worker.filebeat.es_password* in the *values.yaml* file of the wazuh helm chart.
+
+## Helm values.yaml overrides
 | Yaml Path | default | Function |
 |:--------- | ------- | -------- |
 | wazuh.cluster.enabled | true | If *false* will only launch the manager pod with no environment variables|
@@ -73,6 +98,7 @@ The "data" portion of the secret always contains the PEM-encoded data for each a
   - Provided YAML array of unquoted strings
   - Provided JSON
 - Test persistence of the various containers. Right now containers re-initialize completely each time they're rebooted
+- Add provisions to allow for syslog service. This wasn't done because no encryption is supported at the moment.
 
 
 # Resource materials
