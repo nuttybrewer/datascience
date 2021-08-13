@@ -216,8 +216,8 @@ spec:
           claimName: {{ .Values.wazuh.worker.persistence.existingClaim }}
       {{- end }}
       {{- end }}
-{{- if .Values.worker.extraVolumes }}
-{{ toYaml .Values.worker.extraVolumes | indent 6 }}
+{{- if .Values.wazuh.worker.extraVolumes }}
+{{ toYaml .Values.wazuh.worker.extraVolumes | indent 6 }}
 {{- end }}
   {{- if and .Values.wazuh.worker.persistence.enabled (not .Values.wazuh.manager.persistence.existingClaim) }}
   volumeClaimTemplates:
