@@ -26,7 +26,7 @@ if [[ ! -e "/var/ossec/etc/initialized" ]]; then
   # If the directory is present but not initialized, initialize it.
   if [[ ! -L "/var/ossec" && $WAZUH_PERSIST_OSSEC == "yes" ]]; then
     echo "Copying over /opt/ossec to /var/ossec"
-    cp -a  /opt/ossec /var/ossec
+    cp -a  /opt/ossec/* /var/ossec
   fi
   if [[ $WAZUH_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
     # The configuration file isn't valid XML, we need to wrap it in root tags
