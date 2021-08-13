@@ -81,7 +81,7 @@ wazuh:
       # requests:
       #   cpu: 100m
       #   memory: 128Mi
-    serviceAnnotations: {}      
+    serviceAnnotations: {}
     podAnnotations: {}
     podSecurityContext: {}
       # fsGroup: 2000
@@ -129,6 +129,16 @@ wazuh:
       targetMemoryUtilizationPercentage: 80
     podAnnotations: {}
     podSecurityContext: {}
+
+    persistence:
+      enabled: true
+      # existingClaim:
+      subPath: ""
+      # storageClass: "-"
+      accessModes:
+        - ReadWriteOnce
+      size: 8Gi
+      annotations: {}
       # fsGroup: 2000
     nodeSelector: {}
     tolerations: []
