@@ -5,4 +5,4 @@ USER root
 RUN /sbin/apk add jq yq
 ADD entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 USER node
-ENTRYPOINT["/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
