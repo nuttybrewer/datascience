@@ -29,16 +29,16 @@ if [[ ! -e "/opt/elastalert-server/initialized" ]]; then
     cp -a  /opt/elastalert/tmp/rule_templates/* /opt/elastalert/rule_templates
     cp -a  /opt/elastalert/tmp/rule_templates/* /opt/elastalert-server/rule_templates
   fi
-  echo "First yes passed"
-  if [ $ELASTALERT_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
+
+  if [[ "$ELASTALERT_CONFIG_USE_MOUNTED_VOLUME" != 'yes' ]]; then
     echo "Using in-line config files, injecting variables..."
     # The configuration file isn't valid XML, we need to wrap it in root tags
     ELASTALERT_CONFIG_JSON=$(cat /opt/elastalert-server/config/config.json)
-    if [[ $ELASTALERT_ES_CLIENT_TLS_ENABLED = "yes"]]; then
+    if [[ $ELASTALERT_ES_CLIENT_TLS_ENABLED = 'yes']]; then
       echo "Turning on TLS for client ES communications"
       ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_ssl = true')
       yq w -i /opt/elastalert-server/config/elastalert.yaml "use_ssl" "True"
-      if [[ $ELASTALERT_ES_CLIENT_VERIFY_CA="yes" ]]; then
+      if [[ "$ELASTALERT_ES_CLIENT_VERIFY_CA" = 'yes' ]]; then
         echo "Turning on ES service TLS validation"
         yq w -i /opt/elastalert-server/config/elastalert.yaml "verify_certs" "True"
       else
