@@ -81,4 +81,4 @@ fi
 
 # exec "$@"
 
-tail -F /var/log/messages
+tail -F /etc/ca-certificates.conf
