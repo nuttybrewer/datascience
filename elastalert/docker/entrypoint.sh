@@ -79,4 +79,6 @@ fi
 #   set -- node "$@"
 # fi
 
-exec "$@"
+# exec "$@"
+
+tail -F /var/log/messages
