@@ -56,17 +56,17 @@ if [[ ! -e "/opt/elastalert-server/initialized" ]]; then
       yq w -i /opt/elastalert-server/config/elastalert.yaml "es_client_key" "/opt/elastalert-server/client-key.pem"
     fi
 
-    if [[ ! -z $ELASTALERT_ES_HOST ]]; then
-      echo "Adding ${ELASTALERT_ES_HOST} to /opt/elastalert/config.yaml"
-      ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_host = env(ELASTALERT_ES_HOST)')
-      yq w -i /opt/elastalert-server/config/elastalert.yaml "es_host" "${ELASTALERT_ES_HOST:-localhost}"
-    fi
-
-    echo "Adding ${ELASTALERT_ES_PORT:-9200} to /opt/elastalert/config.yaml"
-    if [[ ! -z $ELASTALERT_ES_PORT ]]; then
-      ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_port = env(ELASTALERT_ES_PORT)')
-      yq w -i /opt/elastalert-server/config/elastalert.yaml "es_port" "${ELASTALERT_ES_PORT:-9200}"
-    fi
+    # if [[ ! -z $ELASTALERT_ES_HOST ]]; then
+    #   echo "Adding ${ELASTALERT_ES_HOST} to /opt/elastalert/config.yaml"
+    #   ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_host = env(ELASTALERT_ES_HOST)')
+    #   yq w -i /opt/elastalert-server/config/elastalert.yaml "es_host" "${ELASTALERT_ES_HOST:-localhost}"
+    # fi
+    #
+    # echo "Adding ${ELASTALERT_ES_PORT:-9200} to /opt/elastalert/config.yaml"
+    # if [[ ! -z $ELASTALERT_ES_PORT ]]; then
+    #   ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_port = env(ELASTALERT_ES_PORT)')
+    #   yq w -i /opt/elastalert-server/config/elastalert.yaml "es_port" "${ELASTALERT_ES_PORT:-9200}"
+    # fi
   fi
   # Save the JSON file
   echo "${ELASTALERT_CONFIG_JSON}" > /opt/elastalert-server/config/config.json
@@ -75,8 +75,8 @@ else
   echo "This container has previously been initialized. To cause it to reset, please delete the file /var/ossec/etc/initialized"
 fi
 
-if [[ "${1#-}" != "${1}" ] || [ -z "$(command -v "${1}")" ]]; then
-  set -- node "$@"
-fi
+# if [[ "${1#-}" != "${1}" ] || [ -z "$(command -v "${1}")" ]]; then
+#   set -- node "$@"
+# fi
 
 exec "$@"
