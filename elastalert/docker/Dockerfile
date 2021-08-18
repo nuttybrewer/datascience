@@ -4,5 +4,6 @@ RUN rm -rf /opt/elastalert-server/rule_templates && ln -s /opt/elastalert/tmp/ru
 USER root
 RUN /sbin/apk add jq yq
 ADD entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod a+x /usr/local/bin/docker-entrypoint.sh
 USER node
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
