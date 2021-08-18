@@ -3,7 +3,7 @@ set -e
 echo "Provided environment variables"
 echo "ELASTALERT_PERSIST_RULES: ${ELASTALERT_PERSIST_RULES:-no}"
 echo "ELASTALERT_CONFIG_USE_MOUNTED_VOLUME: ${ELASTALERT_CONFIG_USE_MOUNTED_VOLUME:-no}"
-echo "ELASTALERT_ES_HOSTS: ${ELASTALERT_ES_HOSTS}"
+echo "ELASTALERT_ES_HOST: ${ELASTALERT_ES_HOST}"
 echo "ELASTALERT_ES_TLS_ENABLED: ${ELASTALERT_ES_TLS_ENABLED:-no}"
 echo "ELASTALERT_ES_CLIENT_VERIFY_CA: ${ELASTALERT_ES_CLIENT_VERIFY_CA:-no}"
 echo "ELASTALERT_ES_USER: ${ELASTALERT_ES_USER}"
@@ -56,7 +56,7 @@ if [[ ! -e "/opt/elastalert-server/initialized" ]]; then
       yq w -i /opt/elastalert-server/config/elastalert.yaml "es_client_key" "/opt/elastalert-server/client-key.pem"
     fi
 
-    if [[ $ELASTALERT_ES_HOST ]]; then
+    if [[ ! -z $ELASTALERT_ES_HOST ]]; then
       echo "Adding ${ELASTALERT_ES_HOST} to /opt/elastalert/config.yaml"
       ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_host = env(ELASTALERT_ES_HOST)')
       yq w -i /opt/elastalert-server/config/elastalert.yaml "es_host" "${ELASTALERT_ES_HOST:-localhost}"
