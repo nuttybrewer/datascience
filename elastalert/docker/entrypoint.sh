@@ -22,13 +22,15 @@ fi
 
 if [[ ! -e "/opt/elastalert-server/initialized" ]]; then
   # If the directory is present but not initialized, initialize it.
-  if [[ ! -L "/opt/elastalert-server/rule_templates" && $ELASTALERT_PERSIST_RULES == "yes" ]]; then
+  echo "System not initialized..."
+  if [[ ! -L "/opt/elastalert-server/rule_templates" && $ELASTALERT_PERSIST_RULES = "yes" ]]; then
     echo "Persistent system not initialized"
     echo "Copying over /opt/elastalert/tmp/rule_templates to /opt/elastalert/rule_templates and /opt/elastalert-server/rule_templates"
     cp -a  /opt/elastalert/tmp/rule_templates/* /opt/elastalert/rule_templates
     cp -a  /opt/elastalert/tmp/rule_templates/* /opt/elastalert-server/rule_templates
   fi
-  if [[ $ELASTALERT_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
+  if [ $ELASTALERT_CONFIG_USE_MOUNTED_VOLUME != "yes" ]]; then
+    echo "Using in-line config files, injecting variables..."
     # The configuration file isn't valid XML, we need to wrap it in root tags
     ELASTALERT_CONFIG_JSON=$(cat /opt/elastalert-server/config/config.json)
     if [[ $ELASTALERT_ES_CLIENT_TLS_ENABLED = "yes"]]; then
