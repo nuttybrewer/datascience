@@ -35,7 +35,7 @@ if [[ ! -e "/opt/elastalert-server/initialized" ]]; then
       echo "Turning on TLS for client ES communications"
       ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_ssl = true')
       yq w -i /opt/elastalert-server/config/elastalert.yaml "use_ssl" "True"
-      if [[ $ELASTALERT_ES_CLIENT_VERIFY_CA = "yes" ]]; then
+      if [[ $ELASTALERT_ES_CLIENT_VERIFY_CA="yes" ]]; then
         echo "Turning on ES service TLS validation"
         yq w -i /opt/elastalert-server/config/elastalert.yaml "verify_certs" "True"
       else
