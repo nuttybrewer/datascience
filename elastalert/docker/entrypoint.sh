@@ -45,6 +45,11 @@ if [[ ! -e "/opt/elastalert-server/initialized" ]]; then
         echo "Turning on ES service TLS validation"
         yq w -i /opt/elastalert-server/config/elastalert.yaml "verify_certs" "True"
         yq w -i /opt/elastalert/config.yaml "verify_certs" "True"
+        # es_ca_certs
+        echo "Using CA certs from /opt/elastalert-server/client-chain.pem"
+        ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_ca_certs = "/opt/elastalert-server/client-chain.pem"')
+        yq w -i /opt/elastalert-server/config/elastalert.yaml "ca_certs" "/opt/elastalert-server/client-chain.pem"
+        yq w -i /opt/elastalert/config.yaml "ca_certs" "/opt/elastalert-server/client-chain.pem"        
       else
         echo "Turning off ES service TLS validation"
         yq w -i /opt/elastalert-server/config/elastalert.yaml "verify_certs" "False"
@@ -52,11 +57,6 @@ if [[ ! -e "/opt/elastalert-server/initialized" ]]; then
         yq w -i /opt/elastalert-server/config/elastalert.yaml "ssl_show_warn" "False"
         yq w -i /opt/elastalert/config.yaml "ssl_show_warn" "False"
       fi
-      # es_ca_certs
-      echo "Using CA certs from /opt/elastalert-server/client-chain.pem"
-      ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_ca_certs = "/opt/elastalert-server/client-chain.pem"')
-      yq w -i /opt/elastalert-server/config/elastalert.yaml "ca_certs" "/opt/elastalert-server/client-chain.pem"
-      yq w -i /opt/elastalert/config.yaml "ca_certs" "/opt/elastalert-server/client-chain.pem"
       # es_client_cert
       echo "Using client cert from /opt/elastalert-server/client-cert.pem"
       ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_client_cert = "/opt/elastalert-server/client-cert.pem"')
