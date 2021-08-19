@@ -75,7 +75,7 @@ else
   echo "This container has previously been initialized. To cause it to reset, please delete the file /var/ossec/etc/initialized"
 fi
 
-if [[ "${1#-}" != "${1}" ] || [ -z "$(command -v "${1}")" ]]; then
+if [ "${1#-}" != "${1}" ] || [ -z "$(command -v "${1}")" ]; then
   set -- node "$@"
 fi
 
