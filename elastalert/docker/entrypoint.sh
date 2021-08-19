@@ -46,12 +46,15 @@ if [[ ! -e "/opt/elastalert-server/initialized" ]]; then
         yq w -i /opt/elastalert-server/config/elastalert.yaml "verify_certs" "False"
       fi
       # es_ca_certs
+      echo "Using CA certs from /opt/elastalert-server/client-chain.pem"
       ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_ca_certs = "/opt/elastalert-server/client-chain.pem"')
       yq w -i /opt/elastalert-server/config/elastalert.yaml "es_ca_certs" "/opt/elastalert-server/client-chain.pem"
       # es_client_cert
+      echo "Using client cert from /opt/elastalert-server/client-cert.pem"
       ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_client_cert = "/opt/elastalert-server/client-cert.pem"')
       yq w -i /opt/elastalert-server/config/elastalert.yaml "es_client_cert" "/opt/elastalert-server/client-cert.pem"
       # es_client_key
+      echo "Using client key from /opt/elastalert-server/client-key.pem"
       ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_client_key = "/opt/elastalert-server/client-key.pem"')
       yq w -i /opt/elastalert-server/config/elastalert.yaml "es_client_key" "/opt/elastalert-server/client-key.pem"
     fi
@@ -75,8 +78,8 @@ else
   echo "This container has previously been initialized. To cause it to reset, please delete the file /var/ossec/etc/initialized"
 fi
 
-if [ "${1#-}" != "${1}" ] || [ -z "$(command -v "${1}")" ]; then
-  set -- node "$@"
-fi
-
-exec "$@"
+# if [ "${1#-}" != "${1}" ] || [ -z "$(command -v "${1}")" ]; then
+#   set -- node "$@"
+# fi
+cd /opt/elastalert-server
+exec npm start
