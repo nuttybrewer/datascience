@@ -2,6 +2,7 @@
 set -e
 #
 # https://elastalert2.readthedocs.io/en/latest/elastalert.html#configuration
+# https://github.com/Karql/elastalert
 echo "Provided environment variables"
 echo "ELASTALERT_PERSIST_RULES: ${ELASTALERT_PERSIST_RULES:-no}"
 echo "ELASTALERT_CONFIG_USE_MOUNTED_VOLUME: ${ELASTALERT_CONFIG_USE_MOUNTED_VOLUME:-no}"
@@ -46,10 +47,10 @@ if [[ ! -e "/opt/elastalert-server/initialized" ]]; then
         yq w -i /opt/elastalert-server/config/elastalert.yaml "verify_certs" "True"
         yq w -i /opt/elastalert/config.yaml "verify_certs" "True"
         # es_ca_certs
-        echo "Using CA certs from /opt/elastalert-server/client-chain.pem"
-        ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_ca_certs = "/opt/elastalert-server/client-chain.pem"')
-        yq w -i /opt/elastalert-server/config/elastalert.yaml "ca_certs" "/opt/elastalert-server/client-chain.pem"
-        yq w -i /opt/elastalert/config.yaml "ca_certs" "/opt/elastalert-server/client-chain.pem"        
+        echo "Using CA certs from /opt/elastalert-server/config/client-chain.pem"
+        ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_ca_certs = "/opt/elastalert-server/config/client-chain.pem"')
+        yq w -i /opt/elastalert-server/config/elastalert.yaml "ca_certs" "/opt/elastalert-server/config/client-chain.pem"
+        yq w -i /opt/elastalert/config.yaml "ca_certs" "/opt/elastalert-server/config/client-chain.pem"
       else
         echo "Turning off ES service TLS validation"
         yq w -i /opt/elastalert-server/config/elastalert.yaml "verify_certs" "False"
@@ -58,15 +59,15 @@ if [[ ! -e "/opt/elastalert-server/initialized" ]]; then
         yq w -i /opt/elastalert/config.yaml "ssl_show_warn" "False"
       fi
       # es_client_cert
-      echo "Using client cert from /opt/elastalert-server/client-cert.pem"
-      ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_client_cert = "/opt/elastalert-server/client-cert.pem"')
-      yq w -i /opt/elastalert-server/config/elastalert.yaml "client_cert" "/opt/elastalert-server/client-cert.pem"
-      yq w -i /opt/elastalert/config.yaml "client_cert" "/opt/elastalert-server/client-cert.pem"
+      echo "Using client cert from /opt/elastalert-server/config/client-cert.pem"
+      ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_client_cert = "/opt/elastalert-server/config/client-cert.pem"')
+      yq w -i /opt/elastalert-server/config/elastalert.yaml "client_cert" "/opt/elastalert-server/config/client-cert.pem"
+      yq w -i /opt/elastalert/config.yaml "client_cert" "/opt/elastalert-server/config/client-cert.pem"
       # es_client_key
-      echo "Using client key from /opt/elastalert-server/client-key.pem"
-      ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_client_key = "/opt/elastalert-server/client-key.pem"')
-      yq w -i /opt/elastalert-server/config/elastalert.yaml "client_key" "/opt/elastalert-server/client-key.pem"
-      yq w -i /opt/elastalert/config.yaml "client_key" "/opt/elastalert-server/client-key.pem"
+      echo "Using client key from /opt/elastalert-server/config/client-key.pem"
+      ELASTALERT_CONFIG_JSON=$(echo $ELASTALERT_CONFIG_JSON | jq '.es_client_key = "/opt/elastalert-server/config/client-key.pem"')
+      yq w -i /opt/elastalert-server/config/elastalert.yaml "client_key" "/opt/elastalert-server/config/client-key.pem"
+      yq w -i /opt/elastalert/config.yaml "client_key" "/opt/elastalert-server/config/client-key.pem"
     fi
 
     if [[ ! -z $ELASTALERT_ES_HOST ]]; then
